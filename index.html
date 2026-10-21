@@ -60,41 +60,41 @@
   <nav class="bg-slate-900/80 border-b border-slate-800 px-4 lg:px-8 py-2 overflow-x-auto flex space-x-2 scrollbar-none">
     <button onclick="switchTab('tab-graph')" id="btn-tab-graph" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold flex items-center space-x-2 bg-cyan-950/70 border border-cyan-500/50 text-cyan-300 shadow-sm transition-all whitespace-nowrap">
       <i class="fa-solid fa-route"></i>
-      <span>Unit IV: Graph Dispatch & MST</span>
+      <span>Emergency Dispatch & Utility Spanning</span>
     </button>
     <button onclick="switchTab('tab-knapsack')" id="btn-tab-knapsack" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold flex items-center space-x-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-all whitespace-nowrap">
       <i class="fa-solid fa-truck-ramp-box"></i>
-      <span>Unit III: DP & Knapsack (Tabulation & Memo)</span>
+      <span>Relief Logistics & Payload Rationing</span>
     </button>
     <button onclick="switchTab('tab-lcs-obst')" id="btn-tab-lcs-obst" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold flex items-center space-x-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-all whitespace-nowrap">
       <i class="fa-solid fa-diagram-project"></i>
-      <span>Unit III: LCS & Optimal BST</span>
+      <span>Consensus Streams & Index Optimization</span>
     </button>
     <button onclick="switchTab('tab-schedule')" id="btn-tab-schedule" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold flex items-center space-x-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-all whitespace-nowrap">
       <i class="fa-solid fa-calendar-check"></i>
-      <span>Unit II: Greedy Scheduling & Corridors</span>
+      <span>Traffic Corridors & Task Scheduling</span>
     </button>
     <button onclick="switchTab('tab-telemetry')" id="btn-tab-telemetry" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold flex items-center space-x-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-all whitespace-nowrap">
       <i class="fa-solid fa-satellite-dish"></i>
-      <span>Unit II: D&C (Tournament, Sort, Strassen)</span>
+      <span>Telemetry Extremes & Matrix Processing</span>
     </button>
     <button onclick="switchTab('tab-patrol')" id="btn-tab-patrol" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold flex items-center space-x-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-all whitespace-nowrap">
       <i class="fa-solid fa-shield-halved"></i>
-      <span>Unit I & V: Asymptotics & Intractable Lab</span>
+      <span>Asymptotic Lab & Intractable Solvers</span>
     </button>
   </nav>
 
   <!-- MAIN WORKSPACE -->
   <main class="flex-1 p-4 lg:p-6 overflow-y-auto max-w-[1700px] w-full mx-auto">
 
-    <!-- UNIT IV: GRAPH DISPATCH -->
+    <!-- GRAPH DISPATCH & MST -->
     <section id="tab-graph" class="tab-content block space-y-4">
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div class="lg:col-span-1 space-y-4">
           <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl space-y-3">
             <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
               <span>Graph Engine Control</span>
-              <span class="text-[10px] text-cyan-400 font-mono">Unit IV</span>
+              <span class="text-[10px] text-cyan-400 font-mono">Routing & MST</span>
             </h2>
             <div>
               <label class="text-xs text-slate-400 font-medium">Algorithmic Solver:</label>
@@ -176,11 +176,11 @@
       </div>
     </div>
 
-    <!-- UNIT III: KNAPSACK (TABULATION & MEMOIZATION) -->
+    <!-- KNAPSACK (TABULATION & MEMOIZATION) -->
     <section id="tab-knapsack" class="tab-content hidden space-y-4">
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 class="text-base font-bold text-slate-100 font-mono">Unit III: 0/1 Knapsack (Bottom-Up Tabulation vs Top-Down Memoization)</h2>
+          <h2 class="text-base font-bold text-slate-100 font-mono">0/1 Knapsack Optimization (Bottom-Up Tabulation vs Top-Down Memoization)</h2>
           <p class="text-xs text-slate-400">Evaluates discrete relief units with space optimization toggle and comparative memoized recursion.</p>
         </div>
         <div class="flex items-center space-x-3 bg-slate-950 px-3 py-2 rounded-lg border border-slate-800">
@@ -230,13 +230,13 @@
       </div>
     </section>
 
-    <!-- UNIT III: LCS & OPTIMAL BST -->
+    <!-- LCS & OPTIMAL BST -->
     <section id="tab-lcs-obst" class="tab-content hidden space-y-4">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <!-- LCS Module -->
         <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3 shadow-xl">
           <div class="flex items-center justify-between">
-            <span class="bg-cyan-500/20 text-cyan-400 text-xs font-mono font-bold px-2 py-0.5 rounded">Unit III: DP</span>
+            <span class="bg-cyan-500/20 text-cyan-400 text-xs font-mono font-bold px-2 py-0.5 rounded">Dynamic Programming</span>
             <h3 class="text-base font-bold text-slate-100">Longest Common Subsequence (LCS)</h3>
           </div>
           <p class="text-xs text-slate-400">Finds consensus dispatch command sequence between two municipal agency streams ($O(m \cdot n)$).</p>
@@ -260,7 +260,7 @@
         <!-- Optimal BST Module -->
         <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3 shadow-xl">
           <div class="flex items-center justify-between">
-            <span class="bg-purple-500/20 text-purple-400 text-xs font-mono font-bold px-2 py-0.5 rounded">Unit III: DP</span>
+            <span class="bg-purple-500/20 text-purple-400 text-xs font-mono font-bold px-2 py-0.5 rounded">Dynamic Programming</span>
             <h3 class="text-base font-bold text-slate-100">Optimal Binary Search Tree (OBST)</h3>
           </div>
           <p class="text-xs text-slate-400">Minimizes expected query cost for smart city database indices with given search frequencies ($O(n^3)$).</p>
@@ -276,7 +276,7 @@
       </div>
     </section>
 
-    <!-- UNIT II: SCHEDULING (ACTIVITY & JOB SEQUENCING) -->
+    <!-- SCHEDULING (ACTIVITY & JOB SEQUENCING) -->
     <section id="tab-schedule" class="tab-content hidden space-y-4">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
@@ -300,7 +300,7 @@
       </div>
     </section>
 
-    <!-- UNIT II: DIVIDE AND CONQUER (TOURNAMENT, SORT, STRASSEN) -->
+    <!-- DIVIDE AND CONQUER (TOURNAMENT, SORT, STRASSEN) -->
     <section id="tab-telemetry" class="tab-content hidden space-y-4">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
         <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
@@ -342,13 +342,13 @@
       </div>
     </section>
 
-    <!-- UNIT I & V: ASYMPTOTICS, SUBSTITUTION & INTRACTABLE LAB -->
+    <!-- ASYMPTOTICS, SUBSTITUTION & INTRACTABLE LAB -->
     <section id="tab-patrol" class="tab-content hidden space-y-4">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <!-- Master Theorem & Substitution -->
         <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3 shadow-xl">
           <div class="flex items-center justify-between">
-            <span class="bg-cyan-500/20 text-cyan-400 text-xs font-mono font-bold px-2 py-0.5 rounded">Unit I: Asymptotic Analysis</span>
+            <span class="bg-cyan-500/20 text-cyan-400 text-xs font-mono font-bold px-2 py-0.5 rounded">Asymptotic Analysis</span>
             <h3 class="text-base font-bold text-slate-100">Master Theorem & Substitution Method</h3>
           </div>
           <div class="grid grid-cols-3 gap-2 bg-slate-950 p-2.5 rounded border border-slate-800 text-xs font-mono">
@@ -369,7 +369,7 @@
         <!-- NP-Hard & Approximation Solvers -->
         <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3 shadow-xl">
           <div class="flex items-center justify-between">
-            <span class="bg-rose-500/20 text-rose-400 text-xs font-mono font-bold px-2 py-0.5 rounded">Unit V: Intractability</span>
+            <span class="bg-rose-500/20 text-rose-400 text-xs font-mono font-bold px-2 py-0.5 rounded">Intractability & Patrols</span>
             <h3 class="text-base font-bold text-slate-100">NP-Hard, Branch & Bound & Approximations</h3>
           </div>
           <select id="npProblemSelector" onchange="updateNpProblemDetails()" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-cyan-300 font-mono">
@@ -597,7 +597,7 @@
       }
     }
 
-    // UNIT III: LCS IMPLEMENTATION
+    // LCS IMPLEMENTATION
     function computeLCS() {
       const s1 = document.getElementById('lcsStr1').value.toUpperCase();
       const s2 = document.getElementById('lcsStr2').value.toUpperCase();
@@ -632,7 +632,7 @@
       document.getElementById('lcsMatrixContainer').innerHTML = html;
     }
 
-    // UNIT III: OPTIMAL BST IMPLEMENTATION
+    // OPTIMAL BST IMPLEMENTATION
     function computeOBST() {
       const keys = ["W1", "W2", "W3", "W4"];
       const p = [0.1, 0.2, 0.4, 0.3];
@@ -662,7 +662,7 @@
       `;
     }
 
-    // UNIT III: KNAPSACK MODULE (TABULATION & MEMOIZATION)
+    // KNAPSACK MODULE
     const knapItems = [
       { name: "Medical Oxygen", weight: 10, value: 60 },
       { name: "ICU Trailer", weight: 20, value: 100 },
@@ -707,7 +707,6 @@
       }
       document.getElementById('discreteResultValue').innerText = dp[n][W] + " pts";
 
-      // Top-Down Memoization Simulation
       const memoTrace = [];
       function memo(i, w) {
         if (i === 0 || w === 0) return 0;
@@ -720,7 +719,6 @@
         ${memoTrace.slice(0, 5).join(" &rarr; ")} ... [Memoized ${n * W} Substates Saved]
       `;
 
-      // Visual Table
       const table = document.getElementById('dpVisualTable');
       table.innerHTML = '';
       for (let i = 0; i <= n; i++) {
