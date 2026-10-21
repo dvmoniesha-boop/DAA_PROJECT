@@ -13,17 +13,19 @@
     .font-mono { font-family: 'JetBrains Mono', monospace; }
     .glow-cyan { box-shadow: 0 0 20px rgba(6, 182, 212, 0.35); }
     .glow-emerald { box-shadow: 0 0 20px rgba(16, 185, 129, 0.35); }
+    .glow-amber { box-shadow: 0 0 20px rgba(245, 158, 11, 0.35); }
     .glow-purple { box-shadow: 0 0 20px rgba(168, 85, 247, 0.35); }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #090d16; }
     ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+    .dp-highlight { background-color: rgba(6, 182, 212, 0.25) !important; color: #38bdf8 !important; font-weight: 700; border: 1px solid #06b6d4 !important; }
     .dp-picked { background-color: rgba(16, 185, 129, 0.3) !important; color: #34d399 !important; font-weight: 700; border: 1px solid #10b981 !important; }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-cyan-500 selection:text-black">
 
-  <!-- HEADER -->
+  <!-- TOP HEADER -->
   <header class="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-md sticky top-0 z-50 px-4 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
     <div class="flex items-center space-x-3.5">
       <div class="relative w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-600 via-sky-500 to-emerald-500 flex items-center justify-center glow-cyan shadow-xl">
@@ -42,6 +44,7 @@
       </div>
     </div>
 
+    <!-- Quick Telemetry & Scenario Preset -->
     <div class="flex items-center space-x-2">
       <label class="text-xs text-slate-400 font-medium hidden sm:inline">Incident:</label>
       <select id="scenarioSelector" class="bg-slate-900 border border-slate-700 text-xs text-cyan-300 font-semibold rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-cyan-500 cursor-pointer">
@@ -87,79 +90,142 @@
   <!-- MAIN WORKSPACE -->
   <main class="flex-1 p-4 lg:p-6 overflow-y-auto max-w-[1700px] w-full mx-auto">
 
-    <!-- GRAPH DISPATCH & MST -->
+    <!-- 1. GRAPH DISPATCH & MST -->
     <section id="tab-graph" class="tab-content block space-y-4">
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        
+        <!-- Controls & Trace -->
         <div class="lg:col-span-1 space-y-4">
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl space-y-3">
-            <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl">
+            <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center justify-between">
               <span>Graph Engine Control</span>
               <span class="text-[10px] text-cyan-400 font-mono">Routing & MST</span>
             </h2>
-            <div>
-              <label class="text-xs text-slate-400 font-medium">Algorithmic Solver:</label>
-              <select id="graphAlgoSelect" class="w-full mt-1 bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-cyan-300 font-semibold focus:ring-2 focus:ring-cyan-500">
-                <option value="dijkstra">Dijkstra's Shortest Path (Min-Priority Queue)</option>
-                <option value="bellman">Bellman-Ford Algorithm (Distance Relaxation)</option>
-                <option value="kruskal">Kruskal's MST (Disjoint Set Union)</option>
-                <option value="prim">Prim's MST (Cut-Property Expansion)</option>
-                <option value="bfs">Breadth-First Search (BFS - Unweighted Shortest)</option>
-                <option value="dfs">Depth-First Search (DFS - Component Isolation)</option>
-              </select>
-            </div>
-            <div id="pathSelectorGroup" class="grid grid-cols-2 gap-2">
+
+            <div class="space-y-3">
               <div>
-                <label class="text-xs text-slate-400">Start (Ward):</label>
-                <select id="startNodeSelect" class="w-full mt-1 bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-white"></select>
+                <label class="text-xs text-slate-400 font-medium">Algorithmic Solver:</label>
+                <select id="graphAlgoSelect" class="w-full mt-1 bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-cyan-300 font-semibold focus:ring-2 focus:ring-cyan-500">
+                  <optgroup label="Single-Source Shortest Path">
+                    <option value="dijkstra">Dijkstra's Algorithm (Min-Priority Queue)</option>
+                    <option value="bellman">Bellman-Ford Algorithm (Distance Relaxation)</option>
+                  </optgroup>
+                  <optgroup label="Minimum Spanning Tree (MST)">
+                    <option value="kruskal">Kruskal's Algorithm (Disjoint Set Union)</option>
+                    <option value="prim">Prim's Algorithm (Cut-Property Expansion)</option>
+                  </optgroup>
+                  <optgroup label="Traversal & Reachability">
+                    <option value="bfs">Breadth-First Search (BFS - Unweighted Shortest)</option>
+                    <option value="dfs">Depth-First Search (DFS - Component Isolation)</option>
+                  </optgroup>
+                </select>
               </div>
-              <div>
-                <label class="text-xs text-slate-400">Incident Target:</label>
-                <select id="endNodeSelect" class="w-full mt-1 bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-white"></select>
+
+              <!-- Start & End Node Selectors -->
+              <div id="pathSelectorGroup" class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="text-xs text-slate-400">Start (Ward):</label>
+                  <select id="startNodeSelect" class="w-full mt-1 bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-white"></select>
+                </div>
+                <div>
+                  <label class="text-xs text-slate-400">Incident Target:</label>
+                  <select id="endNodeSelect" class="w-full mt-1 bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-white"></select>
+                </div>
               </div>
-            </div>
-            <div class="pt-2 border-t border-slate-800/80 space-y-2">
-              <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
-                <span>Speed:</span>
-                <span id="delayVal" class="text-cyan-400">300ms</span>
+
+              <!-- Playback Controls -->
+              <div class="pt-2 border-t border-slate-800/80 space-y-2">
+                <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+                  <span>Execution Delay:</span>
+                  <span id="delayVal" class="text-cyan-400">300ms</span>
+                </div>
+                <input type="range" id="speedSlider" min="50" max="1000" value="300" step="50" class="w-full accent-cyan-400 cursor-pointer">
+
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                  <button id="runGraphBtn" class="bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold py-2 rounded-lg text-xs shadow-md transition-all flex items-center justify-center space-x-1">
+                    <i class="fa-solid fa-play"></i>
+                    <span>Execute</span>
+                  </button>
+                  <button id="resetGraphBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 rounded-lg text-xs border border-slate-700 flex items-center justify-center space-x-1">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span>Reset</span>
+                  </button>
+                </div>
               </div>
-              <input type="range" id="speedSlider" min="50" max="1000" value="300" step="50" class="w-full accent-cyan-400 cursor-pointer">
-              <div class="grid grid-cols-2 gap-2 pt-1">
-                <button id="runGraphBtn" class="bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold py-2 rounded-lg text-xs shadow-md">Run Algorithm</button>
-                <button id="resetGraphBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 rounded-lg text-xs border border-slate-700">Reset</button>
-              </div>
-              <button onclick="toggleFloydWarshallModal()" class="w-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-cyan-300 py-2 rounded-lg text-xs font-semibold">
-                Floyd-Warshall All-Pairs Matrix
+
+              <button onclick="toggleFloydWarshallModal()" class="w-full bg-slate-800/80 hover:bg-slate-700 border border-slate-700/80 text-cyan-300 py-2 rounded-lg text-xs font-semibold flex items-center justify-center space-x-2 transition-all">
+                <i class="fa-solid fa-table-cells"></i>
+                <span>Open Floyd-Warshall All-Pairs Matrix</span>
               </button>
             </div>
           </div>
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl">
-            <h3 class="text-xs font-bold text-slate-300 mb-2 flex items-center justify-between">
-              <span>Execution Trace</span>
-              <span id="stepCounterBadge" class="text-[10px] font-mono bg-slate-800 text-slate-400 px-2 py-0.5 rounded">0 steps</span>
+
+          <!-- Mathematical Complexity Card -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl text-xs space-y-2">
+            <h3 class="font-bold text-slate-200 flex items-center space-x-2">
+              <i class="fa-solid fa-square-root-variable text-cyan-400"></i>
+              <span>Mathematical Complexity</span>
             </h3>
-            <div id="graphExecutionLog" class="bg-slate-950 font-mono text-[11px] p-2.5 rounded-lg h-36 overflow-y-auto space-y-1 text-slate-300 border border-slate-800/80"></div>
+            <div class="p-2.5 bg-slate-950 rounded-lg border border-slate-800/80 font-mono space-y-1">
+              <div class="text-cyan-300 font-bold" id="algoNameDisplay">Dijkstra's Algorithm</div>
+              <div class="text-slate-400">Time: <span class="text-emerald-400 font-bold" id="timeComplexityDisplay">O((V + E) log V)</span></div>
+              <div class="text-slate-400">Space: <span class="text-amber-400 font-bold" id="spaceComplexityDisplay">O(V)</span></div>
+              <div class="text-slate-500 text-[11px]" id="paradigmDisplay">Greedy Strategy with Min-Heap Priority Queue</div>
+            </div>
+          </div>
+
+          <!-- Execution Trace Console -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xs font-bold text-slate-300 flex items-center space-x-1.5">
+                <i class="fa-solid fa-terminal text-emerald-400"></i>
+                <span>Execution Trace</span>
+              </h3>
+              <span id="stepCounterBadge" class="text-[10px] font-mono bg-slate-800 text-slate-400 px-2 py-0.5 rounded">0 steps</span>
+            </div>
+            <div id="graphExecutionLog" class="bg-slate-950 font-mono text-[11px] p-2.5 rounded-lg h-36 overflow-y-auto space-y-1 text-slate-300 border border-slate-800/80">
+              <div class="text-slate-500 italic">Select an algorithm and click 'Execute'...</div>
+            </div>
           </div>
         </div>
 
+        <!-- Canvas Visualizer -->
         <div class="lg:col-span-3 flex flex-col space-y-4">
-          <div class="relative bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl flex-1 flex flex-col min-h-[500px]">
+          <div class="relative bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl flex-1 flex flex-col min-h-[520px]">
             <canvas id="cityCanvas" class="w-full h-full flex-1 cursor-crosshair"></canvas>
           </div>
+
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex items-center justify-between">
-              <div><p class="text-xs text-slate-400">Total Route Weight</p><h4 class="text-xl font-bold font-mono text-cyan-400" id="metricTotalCost">--</h4></div>
-              <i class="fa-solid fa-route text-cyan-400 text-2xl"></i>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between">
+              <div>
+                <p class="text-xs text-slate-400">Path / Backbone Weight</p>
+                <h4 class="text-xl font-bold font-mono text-cyan-400" id="metricTotalCost">--</h4>
+              </div>
+              <div class="w-10 h-10 rounded-lg bg-cyan-950/70 border border-cyan-800/50 flex items-center justify-center text-cyan-400">
+                <i class="fa-solid fa-route"></i>
+              </div>
             </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex items-center justify-between">
-              <div><p class="text-xs text-slate-400">Nodes Spanned</p><h4 class="text-xl font-bold font-mono text-emerald-400" id="metricVertexCount">--</h4></div>
-              <i class="fa-solid fa-cubes-stacked text-emerald-400 text-2xl"></i>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between">
+              <div>
+                <p class="text-xs text-slate-400">Active Wards Selected</p>
+                <h4 class="text-xl font-bold font-mono text-emerald-400" id="metricVertexCount">--</h4>
+              </div>
+              <div class="w-10 h-10 rounded-lg bg-emerald-950/70 border border-emerald-800/50 flex items-center justify-center text-emerald-400">
+                <i class="fa-solid fa-cubes-stacked"></i>
+              </div>
             </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex items-center justify-between">
-              <div><p class="text-xs text-slate-400">Convergence</p><h4 class="text-xl font-bold font-mono text-amber-400" id="metricConvergence">0.0 ms</h4></div>
-              <i class="fa-solid fa-stopwatch-20 text-amber-400 text-2xl"></i>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between">
+              <div>
+                <p class="text-xs text-slate-400">Algorithm Convergence</p>
+                <h4 class="text-xl font-bold font-mono text-amber-400" id="metricConvergence">0.0 ms</h4>
+              </div>
+              <div class="w-10 h-10 rounded-lg bg-amber-950/70 border border-amber-800/50 flex items-center justify-center text-amber-400">
+                <i class="fa-solid fa-stopwatch-20"></i>
+              </div>
             </div>
           </div>
         </div>
+
       </div>
     </section>
 
@@ -167,226 +233,542 @@
     <div id="floydModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-4xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-          <h3 class="text-base font-bold text-slate-100 font-mono">Floyd-Warshall All-Pairs Transit Matrix (Θ(V³))</h3>
-          <button onclick="toggleFloydWarshallModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+          <div>
+            <h3 class="text-base font-bold text-slate-100 flex items-center space-x-2">
+              <span class="bg-purple-950 border border-purple-700/60 text-purple-300 px-2 py-0.5 rounded text-xs font-mono">Dynamic Programming</span>
+              <span>Floyd-Warshall All-Pairs Transit Matrix: D^(k)[i][j] = min(D^(k-1)[i][j], D^(k-1)[i][k] + D^(k-1)[k][j])</span>
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Asymptotic Complexity: Θ(V³) Time • Θ(V²) Space</p>
+          </div>
+          <button onclick="toggleFloydWarshallModal()" class="text-slate-400 hover:text-white text-lg">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
         </div>
         <div class="overflow-x-auto border border-slate-800 rounded-xl bg-slate-950 p-2">
           <div id="floydMatrixContainer" class="text-xs font-mono"></div>
         </div>
+        <div class="flex justify-end">
+          <button onclick="toggleFloydWarshallModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-lg text-slate-200">
+            Close Matrix Window
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- KNAPSACK (TABULATION & MEMOIZATION) -->
+    <!-- 2. KNAPSACK MODULE (TABULATION & TOP-DOWN MEMOIZATION) -->
     <section id="tab-knapsack" class="tab-content hidden space-y-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-wrap items-center justify-between gap-4 shadow-xl">
         <div>
-          <h2 class="text-base font-bold text-slate-100 font-mono">0/1 Knapsack Optimization (Bottom-Up Tabulation vs Top-Down Memoization)</h2>
-          <p class="text-xs text-slate-400">Evaluates discrete relief units with space optimization toggle and comparative memoized recursion.</p>
+          <h2 class="text-base font-bold text-slate-100 flex items-center space-x-2">
+            <span class="bg-cyan-500/20 text-cyan-400 px-2.5 py-0.5 rounded text-xs font-mono font-bold">Dynamic Programming vs Greedy</span>
+            <span>Emergency Relief Logistics & Payload Rationing</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">
+            Comparing <span class="text-emerald-400 font-semibold">0/1 Knapsack (Bottom-Up Tabulation & Top-Down Memoization)</span> for discrete equipment with <span class="text-cyan-300 font-semibold">Fractional Knapsack (Greedy Density Sort)</span>.
+          </p>
         </div>
-        <div class="flex items-center space-x-3 bg-slate-950 px-3 py-2 rounded-lg border border-slate-800">
-          <span class="text-xs text-slate-400">Capacity (W):</span>
-          <span class="text-cyan-400 font-bold font-mono" id="knapCapacityDisplay">50 Tons</span>
-          <input type="range" id="knapCapacitySlider" min="10" max="80" value="50" step="5" class="w-28 accent-cyan-400">
+
+        <div class="flex items-center space-x-4 bg-slate-950 border border-slate-800 px-4 py-2 rounded-xl">
+          <div class="text-right">
+            <div class="text-xs text-slate-400">Payload Capacity (W)</div>
+            <div class="text-base font-bold font-mono text-cyan-400" id="knapCapacityDisplay">50 Tons</div>
+          </div>
+          <input type="range" id="knapCapacitySlider" min="10" max="80" value="50" step="5" class="w-36 accent-cyan-400">
         </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <!-- Item Table & Custom Inject -->
         <div class="lg:col-span-5 space-y-4">
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
-            <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider mb-2">Relief Stock Resource Pool</h3>
-            <table class="w-full text-xs text-left">
-              <thead class="text-slate-400 bg-slate-950 font-mono"><tr><th class="p-2">Item</th><th class="p-2">Weight</th><th class="p-2">Value</th></tr></thead>
-              <tbody id="knapItemTableBody" class="divide-y divide-slate-800 font-mono"></tbody>
-            </table>
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Emergency Relief Catalog</h3>
+              <button onclick="resetKnapsackItems()" class="text-xs text-cyan-400 hover:text-cyan-300 underline font-mono">Reset Defaults</button>
+            </div>
+            <div class="overflow-x-auto max-h-56">
+              <table class="w-full text-xs text-left">
+                <thead class="text-slate-400 bg-slate-950 border-b border-slate-800 font-mono">
+                  <tr>
+                    <th class="p-2">Item Resource</th>
+                    <th class="p-2">Weight ($w_i$)</th>
+                    <th class="p-2">Value ($v_i$)</th>
+                    <th class="p-2">Density ($v_i/w_i$)</th>
+                  </tr>
+                </thead>
+                <tbody id="knapItemTableBody" class="divide-y divide-slate-800/60 font-mono"></tbody>
+              </table>
+            </div>
+
+            <!-- Custom Add Item Form -->
+            <div class="mt-4 pt-3 border-t border-slate-800 text-xs space-y-2">
+              <div class="text-slate-300 font-semibold">Add Custom Resource Unit:</div>
+              <div class="grid grid-cols-3 gap-2">
+                <input type="text" id="newItemName" placeholder="Unit Name" class="bg-slate-950 border border-slate-700 rounded p-1.5 text-white col-span-3">
+                <div>
+                  <label class="text-[10px] text-slate-400">Weight (t):</label>
+                  <input type="number" id="newItemWeight" min="1" max="50" value="12" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-white">
+                </div>
+                <div>
+                  <label class="text-[10px] text-slate-400">Value (pts):</label>
+                  <input type="number" id="newItemValue" min="1" max="200" value="65" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-white">
+                </div>
+                <div class="flex items-end">
+                  <button onclick="addNewKnapsackItem()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold p-1.5 rounded transition-all text-xs">
+                    + Add Item
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
+
+          <!-- Comparison Cards -->
           <div class="grid grid-cols-2 gap-3">
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 glow-cyan">
-              <div class="text-[10px] font-mono text-cyan-400">Fractional (Greedy)</div>
-              <div class="text-xl font-bold font-mono text-cyan-300 mt-1" id="fractionalResultValue">0.0 pts</div>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 glow-cyan">
+              <div class="text-[10px] font-mono text-cyan-400 uppercase font-bold">Fractional Knapsack (Greedy)</div>
+              <div class="text-2xl font-bold font-mono text-cyan-300 mt-1" id="fractionalResultValue">0.0 pts</div>
+              <p class="text-[11px] text-slate-400 mt-1">Continuous supplies sorted by density: $O(n \log n)$.</p>
             </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 glow-emerald">
-              <div class="text-[10px] font-mono text-emerald-400">0/1 Knapsack (DP Tabulated)</div>
-              <div class="text-xl font-bold font-mono text-emerald-300 mt-1" id="discreteResultValue">0 pts</div>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 glow-emerald">
+              <div class="text-[10px] font-mono text-emerald-400 uppercase font-bold">0/1 Knapsack (DP Tabulated)</div>
+              <div class="text-2xl font-bold font-mono text-emerald-300 mt-1" id="discreteResultValue">0 pts</div>
+              <p class="text-[11px] text-slate-400 mt-1">Indivisible units: $dp[i][w] = \max(dp[i-1][w], dp[i-1][w-w_i] + v_i)$.</p>
             </div>
           </div>
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2">
-            <h4 class="text-xs font-bold text-purple-400 font-mono">Top-Down Memoization Recursion Trace:</h4>
-            <div id="memoizationTraceBox" class="bg-slate-950 p-2.5 rounded border border-slate-800 text-[11px] font-mono text-slate-300 max-h-32 overflow-y-auto"></div>
+
+          <!-- Top-Down Memoization Trace -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl space-y-2">
+            <h4 class="text-xs font-bold text-purple-400 font-mono flex items-center space-x-1.5">
+              <i class="fa-solid fa-code-merge"></i>
+              <span>Top-Down Memoization Trace & Recursion Tree:</span>
+            </h4>
+            <div id="memoizationTraceBox" class="bg-slate-950 p-2.5 rounded border border-slate-800 text-[11px] font-mono text-slate-300 max-h-36 overflow-y-auto space-y-1"></div>
           </div>
         </div>
 
-        <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
-          <div class="flex justify-between items-center">
-            <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Tabulation Matrix (Bottom-Up)</h3>
-            <button onclick="toggleDpSpaceOpt()" id="dpSpaceToggleBtn" class="bg-slate-800 hover:bg-slate-700 text-xs text-amber-300 border border-amber-600/40 px-2.5 py-1 rounded font-mono">
-              Toggle 1D Space Optim (O(W))
-            </button>
+        <!-- Tabulation Table Display -->
+        <div class="lg:col-span-7 space-y-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl flex flex-col">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <div>
+                <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Dynamic Programming State Space</h3>
+                <p class="text-[11px] text-slate-400 font-mono">Complexity: $O(n \cdot W)$ Time • Space-Optimization Toggle</p>
+              </div>
+              <button onclick="toggleDpSpaceOpt()" id="dpSpaceToggleBtn" class="bg-slate-800 hover:bg-slate-700 text-xs text-amber-300 border border-amber-600/40 px-3 py-1.5 rounded-lg font-mono">
+                Toggle 1D Space Optim (O(W))
+              </button>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-800 rounded-lg bg-slate-950 p-2 max-h-72">
+              <table id="dpVisualTable" class="w-full text-center text-[10px] font-mono border-collapse"></table>
+            </div>
+
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+              <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+                <h4 class="font-bold text-cyan-400 mb-1 flex items-center space-x-1">
+                  <i class="fa-solid fa-gas-pump text-xs"></i>
+                  <span>Fractional Greedy Allocation:</span>
+                </h4>
+                <div id="fractionalItemsList" class="space-y-1 text-slate-300 font-mono text-[11px] max-h-28 overflow-y-auto"></div>
+              </div>
+              <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+                <h4 class="font-bold text-emerald-400 mb-1 flex items-center space-x-1">
+                  <i class="fa-solid fa-boxes-packing text-xs"></i>
+                  <span>0/1 Optimal Discrete Subset:</span>
+                </h4>
+                <div id="discreteItemsList" class="space-y-1 text-slate-300 font-mono text-[11px] max-h-28 overflow-y-auto"></div>
+              </div>
+            </div>
           </div>
-          <div class="overflow-x-auto border border-slate-800 rounded bg-slate-950 p-2 max-h-72">
-            <table id="dpVisualTable" class="w-full text-center text-[10px] font-mono"></table>
-          </div>
-          <div id="discreteItemsList" class="bg-slate-950 p-2.5 rounded border border-slate-800 text-xs font-mono text-emerald-400"></div>
         </div>
       </div>
     </section>
 
-    <!-- LCS & OPTIMAL BST -->
+    <!-- 3. LCS & OPTIMAL BST -->
     <section id="tab-lcs-obst" class="tab-content hidden space-y-4">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <!-- LCS Module -->
+        
+        <!-- Longest Common Subsequence (LCS) -->
         <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3 shadow-xl">
           <div class="flex items-center justify-between">
             <span class="bg-cyan-500/20 text-cyan-400 text-xs font-mono font-bold px-2 py-0.5 rounded">Dynamic Programming</span>
             <h3 class="text-base font-bold text-slate-100">Longest Common Subsequence (LCS)</h3>
           </div>
-          <p class="text-xs text-slate-400">Finds consensus dispatch command sequence between two municipal agency streams ($O(m \cdot n)$).</p>
+          <p class="text-xs text-slate-400">
+            Identifies mutual consensus command sequences between emergency agency streams: $O(m \cdot n)$ DP matrix.
+          </p>
           <div class="grid grid-cols-2 gap-2 text-xs font-mono">
             <div>
-              <label class="text-slate-400">Stream 1:</label>
+              <label class="text-slate-400">Agency Dispatch Stream 1:</label>
               <input type="text" id="lcsStr1" value="HOSPITAL" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-cyan-300 uppercase font-bold">
             </div>
             <div>
-              <label class="text-slate-400">Stream 2:</label>
+              <label class="text-slate-400">Agency Dispatch Stream 2:</label>
               <input type="text" id="lcsStr2" value="DISPATCH" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-cyan-300 uppercase font-bold">
             </div>
           </div>
-          <button onclick="computeLCS()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold py-2 rounded text-xs">Compute LCS Matrix</button>
-          <div id="lcsResultText" class="text-xs font-mono text-emerald-400 font-bold">LCS: --</div>
+          <button onclick="computeLCS()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold py-2 rounded text-xs transition-all shadow-md">
+            Compute LCS State Matrix & Backtrack
+          </button>
+          <div id="lcsResultText" class="text-xs font-mono text-emerald-400 font-bold bg-slate-950 p-2 rounded border border-slate-800">
+            LCS Consensus: Awaiting evaluation...
+          </div>
           <div class="overflow-x-auto border border-slate-800 rounded bg-slate-950 p-2 max-h-56">
             <div id="lcsMatrixContainer" class="text-[10px] font-mono"></div>
           </div>
         </div>
 
-        <!-- Optimal BST Module -->
+        <!-- Optimal Binary Search Tree (OBST) -->
         <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3 shadow-xl">
           <div class="flex items-center justify-between">
             <span class="bg-purple-500/20 text-purple-400 text-xs font-mono font-bold px-2 py-0.5 rounded">Dynamic Programming</span>
             <h3 class="text-base font-bold text-slate-100">Optimal Binary Search Tree (OBST)</h3>
           </div>
-          <p class="text-xs text-slate-400">Minimizes expected query cost for smart city database indices with given search frequencies ($O(n^3)$).</p>
-          <div class="bg-slate-950 p-2.5 rounded border border-slate-800 text-xs font-mono space-y-1">
-            <div class="text-slate-300">Keys: [Ward 1, Ward 2, Ward 3, Ward 4]</div>
-            <div class="text-amber-400">Frequencies (p): [0.1, 0.2, 0.4, 0.3]</div>
+          <p class="text-xs text-slate-400">
+            Minimizes expected query depth cost for smart city database indices with given search access probabilities: $O(n^3)$ DP.
+          </p>
+          <div class="bg-slate-950 p-3 rounded border border-slate-800 text-xs font-mono space-y-1">
+            <div class="text-slate-300">Indexed Wards: <span class="text-cyan-400">[Ward 1, Ward 2, Ward 3, Ward 4]</span></div>
+            <div class="text-slate-400">Probabilities: <span class="text-amber-400">[p1: 0.1, p2: 0.2, p3: 0.4, p4: 0.3]</span></div>
           </div>
-          <button onclick="computeOBST()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded text-xs">Calculate Min Expected Cost & Root</button>
-          <div id="obstOutputBox" class="bg-slate-950 p-3 rounded border border-slate-800 text-xs font-mono text-slate-300 min-h-[140px]">
-            Click to compute Optimal BST cost table.
+          <button onclick="computeOBST()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded text-xs transition-all shadow-md">
+            Calculate Min Expected Cost & Optimal Root
+          </button>
+          <div id="obstOutputBox" class="bg-slate-950 p-3 rounded border border-slate-800 text-xs font-mono text-slate-300 min-h-[140px] space-y-1.5">
+            Click above to compute Optimal BST cost table.
           </div>
         </div>
+
       </div>
     </section>
 
-    <!-- SCHEDULING (ACTIVITY & JOB SEQUENCING) -->
+    <!-- 4. TRAFFIC & INFRASTRUCTURE SCHEDULING (GREEDY) -->
     <section id="tab-schedule" class="tab-content hidden space-y-4">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
-          <h3 class="text-base font-bold text-slate-100">Activity Selection (Green Corridors)</h3>
-          <p class="text-xs text-slate-400">Greedy early finish time sorting ($O(n \log n)$) to maximize siren-cleared emergency passages.</p>
-          <table class="w-full text-xs text-left">
-            <thead class="bg-slate-950 text-slate-400 font-mono"><tr><th class="p-2">ID</th><th class="p-2">Start</th><th class="p-2">End</th><th class="p-2">Status</th></tr></thead>
-            <tbody id="activityTableBody" class="divide-y divide-slate-800 font-mono"></tbody>
-          </table>
-          <button onclick="runActivitySelection()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold py-2 rounded text-xs">Schedule Corridors</button>
+        
+        <!-- Activity Selection: Green Corridors -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <span class="bg-cyan-500/20 text-cyan-400 text-xs font-mono font-bold px-2 py-0.5 rounded">Greedy Choice Property</span>
+                <h3 class="text-base font-bold text-slate-100 mt-1">Emergency Green Corridor Allocation</h3>
+              </div>
+              <i class="fa-solid fa-truck-medical text-cyan-400 text-xl"></i>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">
+              <strong>Activity Selection:</strong> Greedily maximizes non-overlapping siren-cleared transits by sorting early finish times: $f_1 \le f_2 \dots \le f_n$ in $O(n \log n)$.
+            </p>
+
+            <div class="overflow-x-auto mb-3 border border-slate-800 rounded-lg">
+              <table class="w-full text-xs text-left">
+                <thead class="bg-slate-950 text-slate-400 font-mono">
+                  <tr>
+                    <th class="p-2">Dispatch ID</th>
+                    <th class="p-2">Agency</th>
+                    <th class="p-2">Start (hr)</th>
+                    <th class="p-2">End (hr)</th>
+                    <th class="p-2">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="activityTableBody" class="divide-y divide-slate-800 font-mono text-[11px]"></tbody>
+              </table>
+            </div>
+
+            <!-- Gantt timeline visualizer -->
+            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+              <div class="flex justify-between text-[10px] text-slate-500 font-mono mb-1">
+                <span>00:00</span>
+                <span>06:00</span>
+                <span>12:00</span>
+                <span>18:00</span>
+                <span>24:00</span>
+              </div>
+              <div id="activityGantt" class="relative h-20 w-full bg-slate-900 rounded overflow-hidden border border-slate-800 flex flex-col justify-center space-y-1 p-1"></div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
+            <span class="text-xs text-slate-400 font-mono">Approved Transits: <strong id="activityAcceptedCount" class="text-emerald-400 text-sm">--</strong></span>
+            <button onclick="runActivitySelection()" class="bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs shadow-md transition-all">
+              Schedule Corridors
+            </button>
+          </div>
         </div>
-        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
-          <h3 class="text-base font-bold text-slate-100">Job Sequencing with Deadlines</h3>
-          <p class="text-xs text-slate-400">Schedules unit-time utility maintenance to maximize city resilience score before deadlines.</p>
-          <table class="w-full text-xs text-left">
-            <thead class="bg-slate-950 text-slate-400 font-mono"><tr><th class="p-2">Task</th><th class="p-2">Deadline</th><th class="p-2">Profit</th><th class="p-2">Slot</th></tr></thead>
-            <tbody id="jobTableBody" class="divide-y divide-slate-800 font-mono"></tbody>
-          </table>
-          <button onclick="runJobSequencing()" class="w-full bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold py-2 rounded text-xs">Execute Job Sequencing</button>
+
+        <!-- Job Sequencing with Deadlines -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <span class="bg-amber-500/20 text-amber-400 text-xs font-mono font-bold px-2 py-0.5 rounded">Greedy Optimization</span>
+                <h3 class="text-base font-bold text-slate-100 mt-1">Infrastructure Maintenance Scheduling</h3>
+              </div>
+              <i class="fa-solid fa-screwdriver-wrench text-amber-400 text-xl"></i>
+            </div>
+            <p class="text-xs text-slate-400 mb-3">
+              <strong>Job Sequencing with Deadlines & Safety Profit:</strong> Schedules 1-unit time critical utility maintenance jobs to maximize resilience score before deadlines.
+            </p>
+
+            <div class="overflow-x-auto mb-3 border border-slate-800 rounded-lg">
+              <table class="w-full text-xs text-left">
+                <thead class="bg-slate-950 text-slate-400 font-mono">
+                  <tr>
+                    <th class="p-2">Task Code</th>
+                    <th class="p-2">Description</th>
+                    <th class="p-2">Deadline</th>
+                    <th class="p-2">Resilience Profit</th>
+                    <th class="p-2">Assigned Slot</th>
+                  </tr>
+                </thead>
+                <tbody id="jobTableBody" class="divide-y divide-slate-800 font-mono text-[11px]"></tbody>
+              </table>
+            </div>
+
+            <!-- Timeline Slot Allocation Display -->
+            <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+              <span class="text-[10px] text-slate-500 font-mono uppercase block mb-1">Time Slots Allocation (Hours):</span>
+              <div id="jobTimeSlots" class="grid grid-cols-5 gap-2"></div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
+            <span class="text-xs text-slate-400 font-mono">Total Profit: <strong id="totalJobProfit" class="text-amber-400 text-sm">--</strong></span>
+            <button onclick="runJobSequencing()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs shadow-md transition-all">
+              Execute Job Sequencing
+            </button>
+          </div>
         </div>
+
       </div>
     </section>
 
-    <!-- DIVIDE AND CONQUER (TOURNAMENT, SORT, STRASSEN) -->
+    <!-- 5. SENSORS & DIVIDE AND CONQUER (D&C) -->
     <section id="tab-telemetry" class="tab-content hidden space-y-4">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
-          <div class="flex justify-between items-center">
-            <h3 class="text-base font-bold text-slate-100">AQI Min-Max Tournament Extraction</h3>
-            <button onclick="regenerateSensorTelemetry()" class="bg-slate-800 px-3 py-1 rounded text-xs text-cyan-400 font-mono">Resample</button>
+        
+        <!-- Max-Min Tournament Extraction & Binary Search (7 cols) -->
+        <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="bg-cyan-500/20 text-cyan-400 text-xs font-mono font-bold px-2 py-0.5 rounded">Divide and Conquer</span>
+              <h3 class="text-base font-bold text-slate-100 mt-1">AQI Sensor Array: Min-Max Tournament Extraction</h3>
+            </div>
+            <button onclick="regenerateSensorTelemetry()" class="bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-cyan-800/60 px-3 py-1.5 rounded-lg text-xs font-mono">
+              <i class="fa-solid fa-arrows-rotate mr-1"></i> Resample
+            </button>
           </div>
-          <p class="text-xs text-slate-400">Guarantees strictly $3n/2 - 2$ comparisons over naive $2n - 2$ linear scans.</p>
-          <div id="sensorPillsContainer" class="flex flex-wrap gap-2"></div>
+
+          <p class="text-xs text-slate-400">
+            Simultaneous search for extremes: Naive linear scan requires $2n - 2$ comparisons. <strong>Divide and Conquer tournament tree</strong> guarantees strictly $\mathbf{\frac{3n}{2} - 2}$ comparisons ($T(n) = 2T(n/2) + 2$).
+          </p>
+
+          <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+            <span class="text-[11px] font-mono text-slate-400 block mb-2">Live Ward Air Quality Indices (AQI PPM):</span>
+            <div id="sensorPillsContainer" class="flex flex-wrap gap-2"></div>
+          </div>
+
+          <div class="bg-slate-950 p-4 rounded-lg border border-slate-800">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs font-mono font-bold text-slate-300">Tournament Tree Trace</span>
+              <span class="text-xs font-mono text-emerald-400" id="comparisonCounterText">Saved comparisons</span>
+            </div>
+            <div id="dncTreeVisual" class="font-mono text-[11px] space-y-2 max-h-48 overflow-y-auto"></div>
+          </div>
+
           <div class="grid grid-cols-2 gap-3 text-xs font-mono">
-            <div class="p-3 bg-slate-950 rounded border border-slate-800 text-emerald-400">Min: <span id="minSensorVal">--</span></div>
-            <div class="p-3 bg-slate-950 rounded border border-slate-800 text-rose-400">Max: <span id="maxSensorVal">--</span></div>
+            <div class="p-3 bg-slate-950 rounded-lg border border-slate-800">
+              <span class="text-slate-400 block">Lowest AQI:</span>
+              <span class="text-xl font-bold text-emerald-400" id="minSensorVal">--</span>
+            </div>
+            <div class="p-3 bg-slate-950 rounded-lg border border-slate-800">
+              <span class="text-slate-400 block">Peak AQI:</span>
+              <span class="text-xl font-bold text-rose-400" id="maxSensorVal">--</span>
+            </div>
           </div>
-          <div class="p-3 bg-slate-950 rounded border border-slate-800 space-y-2">
-            <span class="text-xs font-bold text-cyan-300">Binary Search Prober (O(log n)):</span>
-            <div class="flex space-x-2">
-              <input type="number" id="binarySearchInput" value="95" class="bg-slate-900 border border-slate-700 rounded px-2 text-xs w-24 text-white">
-              <button onclick="runBinarySearchTelemetry()" class="bg-cyan-600 px-3 py-1 text-slate-950 font-bold rounded text-xs">Probe</button>
-              <div id="binarySearchResult" class="text-xs font-mono text-slate-300 self-center"></div>
+
+          <!-- Binary Search On Sorted Stream -->
+          <div class="p-3.5 bg-slate-950 rounded-lg border border-slate-800 text-xs space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-cyan-300">Binary Search Threshold Query:</span>
+              <span class="text-[10px] font-mono text-slate-400">O(log n) Time</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <input type="number" id="binarySearchInput" placeholder="Probe AQI" value="95" class="bg-slate-900 border border-slate-700 px-3 py-1.5 rounded text-white text-xs w-36">
+              <button onclick="runBinarySearchTelemetry()" class="bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold px-3 py-1.5 rounded text-xs">
+                Probe Threshold
+              </button>
+              <div id="binarySearchResult" class="text-slate-300 font-mono text-xs">Awaiting probe...</div>
             </div>
           </div>
         </div>
 
+        <!-- Sorting Benchmark & Strassen (5 cols) -->
         <div class="lg:col-span-5 space-y-4">
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2">
-            <h4 class="text-sm font-bold text-slate-100">Merge vs Quick Sort Stream Benchmark</h4>
-            <button onclick="runSortingBenchmark()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-1.5 rounded text-xs">Run Benchmark</button>
-            <div class="grid grid-cols-2 gap-2 text-xs font-mono">
-              <div class="bg-slate-950 p-2 rounded border border-slate-800"><span class="text-cyan-400">Merge Sort:</span> <div id="mergeSortOps">-- ops</div></div>
-              <div class="bg-slate-950 p-2 rounded border border-slate-800"><span class="text-amber-400">Quick Sort:</span> <div id="quickSortOps">-- ops</div></div>
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-3">
+            <div>
+              <span class="bg-emerald-500/20 text-emerald-400 text-xs font-mono font-bold px-2 py-0.5 rounded">Sorting Benchmark</span>
+              <h3 class="text-base font-bold text-slate-100 mt-1">Telemetry Sorting: Merge vs Quick Sort</h3>
+            </div>
+
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-slate-400">Buffer Size (N):</span>
+              <span class="text-cyan-400 font-bold" id="sortSizeLabel">500 Samples</span>
+            </div>
+            <input type="range" id="sortSizeSlider" min="100" max="2500" value="500" step="100" class="w-full accent-emerald-400">
+
+            <button onclick="runSortingBenchmark()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold py-2 rounded-lg text-xs transition-all shadow-md">
+              Run Empirical Stream Benchmark
+            </button>
+
+            <div class="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
+              <div class="bg-slate-950 p-2.5 rounded border border-slate-800">
+                <span class="text-cyan-400 font-bold block">Merge Sort (D&C)</span>
+                <span class="text-slate-400 text-[10px]">T(n) = 2T(n/2) + Θ(n)</span>
+                <div class="text-slate-200 mt-1" id="mergeSortTime">-- ms</div>
+                <div class="text-[10px] text-cyan-300" id="mergeSortOps">-- ops</div>
+              </div>
+              <div class="bg-slate-950 p-2.5 rounded border border-slate-800">
+                <span class="text-amber-400 font-bold block">Quick Sort</span>
+                <span class="text-slate-400 text-[10px]">Avg: Θ(n log n)</span>
+                <div class="text-slate-200 mt-1" id="quickSortTime">-- ms</div>
+                <div class="text-[10px] text-amber-300" id="quickSortOps">-- ops</div>
+              </div>
+            </div>
+
+            <div class="h-32 w-full pt-1">
+              <canvas id="sortBenchmarkChart"></canvas>
             </div>
           </div>
-          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-2">
-            <h4 class="text-sm font-bold text-slate-100">Strassen's Matrix Transit Flow (2x2)</h4>
-            <button onclick="runStrassenDemo()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-1.5 rounded text-xs">Compute 7 Submultiplications</button>
-            <div id="strassenResultBox" class="bg-slate-950 p-2.5 rounded border border-slate-800 text-[11px] font-mono text-slate-300"></div>
+
+          <!-- Strassen's Matrix Multiplier -->
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-3">
+            <div>
+              <span class="bg-purple-500/20 text-purple-400 text-xs font-mono font-bold px-2 py-0.5 rounded">Divide & Conquer</span>
+              <h4 class="text-sm font-bold text-slate-100 mt-1">Strassen's Transit Flow Matrix (2x2 Multiplier)</h4>
+            </div>
+            <p class="text-xs text-slate-400">
+              Reduces multiplications from 8 to 7: $T(n) = 7T(n/2) + \Theta(n^2) \implies O(n^{2.81})$.
+            </p>
+            <button onclick="runStrassenDemo()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-1.5 rounded-lg text-xs transition-all shadow-md">
+              Calculate Zone Flow via Strassen
+            </button>
+            <div id="strassenResultBox" class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-[11px] font-mono text-slate-300">
+              Click to compute origin-destination flow cross-product.
+            </div>
           </div>
         </div>
+
       </div>
     </section>
 
-    <!-- ASYMPTOTICS, SUBSTITUTION & INTRACTABLE LAB -->
+    <!-- 6. ASYMPTOTICS, SUBSTITUTION & INTRACTABLE LAB -->
     <section id="tab-patrol" class="tab-content hidden space-y-4">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        
         <!-- Master Theorem & Substitution -->
-        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3 shadow-xl">
-          <div class="flex items-center justify-between">
-            <span class="bg-cyan-500/20 text-cyan-400 text-xs font-mono font-bold px-2 py-0.5 rounded">Asymptotic Analysis</span>
-            <h3 class="text-base font-bold text-slate-100">Master Theorem & Substitution Method</h3>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
+          <div>
+            <span class="bg-cyan-500/20 text-cyan-400 text-xs font-mono font-bold px-2 py-0.5 rounded">Asymptotic Recurrence Analysis</span>
+            <h3 class="text-base font-bold text-slate-100 mt-1">Master Theorem & Recursion Tree Lab</h3>
+            <p class="text-xs text-slate-400">
+              Analyze Divide-and-Conquer Recurrences: $T(n) = aT(n/b) + f(n)$ where $f(n) = \Theta(n^k \log^p n)$.
+            </p>
           </div>
-          <div class="grid grid-cols-3 gap-2 bg-slate-950 p-2.5 rounded border border-slate-800 text-xs font-mono">
-            <div><label class="text-slate-400">a (subproblems):</label><input type="number" id="masterA" value="2" min="1" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-cyan-300"></div>
-            <div><label class="text-slate-400">b (scale):</label><input type="number" id="masterB" value="2" min="2" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-cyan-300"></div>
-            <div><label class="text-slate-400">k (n^k):</label><input type="number" id="masterK" value="1" min="0" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-cyan-300"></div>
+
+          <div class="grid grid-cols-3 gap-3 bg-slate-950 p-3.5 rounded-lg border border-slate-800 text-xs font-mono">
+            <div>
+              <label class="text-slate-400 block mb-1">Subproblems ($a \ge 1$):</label>
+              <input type="number" id="masterA" value="2" min="1" max="16" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-cyan-300 font-bold">
+            </div>
+            <div>
+              <label class="text-slate-400 block mb-1">Scale Factor ($b > 1$):</label>
+              <input type="number" id="masterB" value="2" min="2" max="16" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-cyan-300 font-bold">
+            </div>
+            <div>
+              <label class="text-slate-400 block mb-1">Degree ($k \ge 0$):</label>
+              <input type="number" id="masterK" value="1" min="0" max="4" step="0.5" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-cyan-300 font-bold">
+            </div>
           </div>
-          <button onclick="solveMasterTheorem()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold py-1.5 rounded text-xs">Evaluate Recurrence</button>
-          <div id="masterResultCard" class="bg-slate-950 p-3 rounded border border-slate-800 text-xs font-mono text-emerald-400 font-bold"></div>
-          <!-- Substitution Method Walkthrough -->
-          <div class="bg-slate-950 p-3 rounded border border-slate-800 text-xs font-mono space-y-1">
+
+          <button onclick="solveMasterTheorem()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold py-2 rounded-lg text-xs transition-all shadow-md">
+            Evaluate Master Theorem Case
+          </button>
+
+          <div id="masterResultCard" class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-1.5 text-xs font-mono">
+            <div class="text-slate-400" id="masterCriticalExp">Critical Exponent: $\log_b(a) = \log_2(2) = 1.00$</div>
+            <div class="text-emerald-400 font-bold text-sm" id="masterClassification">Case 2: $\log_b(a) = k \implies T(n) = \Theta(n^k \log n)$</div>
+            <p class="text-slate-400 text-[11px]" id="masterExplanation">Balanced work across all recursion levels.</p>
+          </div>
+
+          <!-- Substitution Method Inductive Walkthrough -->
+          <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-xs font-mono space-y-1">
             <span class="text-amber-400 font-bold">Substitution Method Inductive Step:</span>
             <p class="text-slate-400 text-[11px]">Guess $T(n) \le c n \log n$. Assume $T(n/2) \le c (n/2) \log(n/2)$.</p>
             <p class="text-slate-300 text-[11px]">$T(n) = 2[c(n/2)\log(n/2)] + n \le cn\log n - cn\log 2 + n = cn\log n$ (for $c \ge 1$). $\blacksquare$</p>
           </div>
+
+          <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
+            <span class="text-[11px] font-mono text-slate-400 block mb-2">Recursion Tree Level Decomposition:</span>
+            <div id="recursionTreeCanvas" class="space-y-1 text-[11px] font-mono text-slate-300"></div>
+          </div>
         </div>
 
-        <!-- NP-Hard & Approximation Solvers -->
-        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3 shadow-xl">
-          <div class="flex items-center justify-between">
-            <span class="bg-rose-500/20 text-rose-400 text-xs font-mono font-bold px-2 py-0.5 rounded">Intractability & Patrols</span>
-            <h3 class="text-base font-bold text-slate-100">NP-Hard, Branch & Bound & Approximations</h3>
+        <!-- Municipal Surveillance & Intractability Lab -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
+          <div>
+            <span class="bg-rose-500/20 text-rose-400 text-xs font-mono font-bold px-2 py-0.5 rounded">NP-Hard, Branch & Bound & Approximations</span>
+            <h3 class="text-base font-bold text-slate-100 mt-1">Surveillance, Patrol Tours & Intractable Solvers</h3>
+            <p class="text-xs text-slate-400">
+              Interactive solvers for civic optimization problems classified as NP-Complete / NP-Hard.
+            </p>
           </div>
-          <select id="npProblemSelector" onchange="updateNpProblemDetails()" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-cyan-300 font-mono">
-            <option value="vc">Surveillance CCTV (2-Approximation Vertex Cover)</option>
-            <option value="tsp">Patrol Circuit (Traveling Salesperson / Branch & Bound)</option>
-            <option value="subset">Emergency Fuel Rationing (Subset Sum Problem)</option>
-            <option value="clique">Inter-Agency Crisis Coalition (Max-Clique Problem)</option>
-          </select>
-          <div id="npDetailCard" class="bg-slate-950 p-3 rounded border border-slate-800 space-y-2 text-xs"></div>
+
+          <div class="space-y-2 text-xs">
+            <label class="text-slate-400 font-medium">Select Civic Optimization Problem:</label>
+            <select id="npProblemSelector" onchange="updateNpProblemDetails()" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-cyan-300 font-mono">
+              <option value="vc">Surveillance Camera Placement (2-Approximation Vertex Cover)</option>
+              <option value="tsp">Municipal Inspector Patrol Tour (Traveling Salesperson / Branch & Bound)</option>
+              <option value="subset">Emergency Generator Fuel Rationing (Subset Sum Problem)</option>
+              <option value="clique">Inter-Agency Joint Crisis Coalition (Max-Clique Problem)</option>
+            </select>
+          </div>
+
+          <div id="npDetailCard" class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-3 text-xs"></div>
+
+          <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-xs font-mono space-y-1">
+            <div class="flex justify-between text-slate-300">
+              <span>$O(g(n))$: Asymptotic Upper Bound ($0 \le f(n) \le c_2 g(n)$)</span>
+              <span class="text-rose-400 font-bold">Worst Case</span>
+            </div>
+            <div class="flex justify-between text-slate-300">
+              <span>$\Omega(g(n))$: Asymptotic Lower Bound ($0 \le c_1 g(n) \le f(n)$)</span>
+              <span class="text-emerald-400 font-bold">Best Case</span>
+            </div>
+            <div class="flex justify-between text-slate-300">
+              <span>$\Theta(g(n))$: Asymptotic Tight Bound ($c_1 g(n) \le f(n) \le c_2 g(n)$)</span>
+              <span class="text-cyan-400 font-bold">Exact Bound</span>
+            </div>
+          </div>
         </div>
+
       </div>
     </section>
 
   </main>
 
-  <!-- JAVASCRIPT LOGIC -->
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-800 bg-slate-900/80 px-4 lg:px-8 py-3 text-xs text-slate-500 font-mono flex flex-wrap items-center justify-between gap-2">
+    <div>Smart City Algorithmic Command Center • Production-Grade Civic Optimization Architecture</div>
+    <div class="flex items-center space-x-3 text-slate-400">
+      <span><i class="fa-solid fa-code text-cyan-400"></i> Divide & Conquer • Greedy • Dynamic Programming • Graph Analytics • Branch & Bound</span>
+    </div>
+  </footer>
+
+  <!-- ============================================================== -->
+  <!-- JAVASCRIPT LOGIC - ALL ALGORITHMS FULLY OPERATIONAL            -->
+  <!-- ============================================================== -->
   <script>
+    // 1. TOPOLOGY & GRAPH DATA
     const CITY_NODES = [
       { id: 0, name: "Central Trauma Hospital", x: 130, y: 130, color: "#ef4444" },
       { id: 1, name: "Power Substation Alpha", x: 340, y: 70, color: "#f59e0b" },
@@ -400,17 +782,31 @@
     ];
 
     const CITY_EDGES = [
-      { u: 0, v: 1, weight: 6 }, { u: 0, v: 3, weight: 4 }, { u: 0, v: 4, weight: 8 },
-      { u: 1, v: 2, weight: 5 }, { u: 1, v: 3, weight: 7 }, { u: 2, v: 6, weight: 4 },
-      { u: 2, v: 3, weight: 3 }, { u: 2, v: 7, weight: 9 }, { u: 3, v: 4, weight: 5 },
-      { u: 3, v: 5, weight: 6 }, { u: 4, v: 5, weight: 7 }, { u: 5, v: 7, weight: 4 },
-      { u: 5, v: 8, weight: 5 }, { u: 6, v: 7, weight: 5 }, { u: 7, v: 8, weight: 3 }
+      { u: 0, v: 1, weight: 6 },
+      { u: 0, v: 3, weight: 4 },
+      { u: 0, v: 4, weight: 8 },
+      { u: 1, v: 2, weight: 5 },
+      { u: 1, v: 3, weight: 7 },
+      { u: 2, v: 6, weight: 4 },
+      { u: 2, v: 3, weight: 3 },
+      { u: 2, v: 7, weight: 9 },
+      { u: 3, v: 4, weight: 5 },
+      { u: 3, v: 5, weight: 6 },
+      { u: 4, v: 5, weight: 7 },
+      { u: 5, v: 7, weight: 4 },
+      { u: 5, v: 8, weight: 5 },
+      { u: 6, v: 7, weight: 5 },
+      { u: 7, v: 8, weight: 3 }
     ];
 
     let canvas, ctx;
+    let isRunning = false;
+    let currentAlgorithm = "dijkstra";
+    let stepDelay = 300;
+    let animationTimer = null;
     let highlightedNodes = new Set();
     let highlightedEdges = [];
-    let stepDelay = 300;
+    let nodeDistances = {};
 
     window.onload = function () {
       initCanvas();
@@ -418,10 +814,17 @@
       initKnapsackModule();
       initSchedulingModule();
       initSensorModule();
-      solveMasterTheorem();
+      initMasterTheoremModule();
       updateNpProblemDetails();
       computeLCS();
       computeOBST();
+
+      window.addEventListener('resize', () => {
+        resizeCanvas();
+        drawGraph();
+      });
+
+      applyScenario('downtown');
     };
 
     function switchTab(tabId) {
@@ -430,145 +833,455 @@
         btn.classList.remove('bg-cyan-950/70', 'border', 'border-cyan-500/50', 'text-cyan-300');
         btn.classList.add('text-slate-400');
       });
-      document.getElementById(tabId).classList.remove('hidden');
-      document.getElementById('btn-' + tabId).classList.add('bg-cyan-950/70', 'border', 'border-cyan-500/50', 'text-cyan-300');
+
+      const target = document.getElementById(tabId);
+      if (target) target.classList.remove('hidden');
+
+      const activeBtn = document.getElementById('btn-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-400');
+        activeBtn.classList.add('bg-cyan-950/70', 'border', 'border-cyan-500/50', 'text-cyan-300');
+      }
+
       if (tabId === 'tab-graph') {
-        setTimeout(() => { resizeCanvas(); drawGraph(); }, 50);
+        setTimeout(() => {
+          resizeCanvas();
+          drawGraph();
+        }, 50);
       }
     }
 
+    // CANVAS & GRAPH LOGIC
     function initCanvas() {
       canvas = document.getElementById('cityCanvas');
       ctx = canvas.getContext('2d');
       resizeCanvas();
-      window.addEventListener('resize', () => { resizeCanvas(); drawGraph(); });
-      document.getElementById('runGraphBtn').addEventListener('click', runSelectedGraphAlgorithm);
-      document.getElementById('resetGraphBtn').addEventListener('click', resetGraphState);
+
+      document.getElementById('graphAlgoSelect').addEventListener('change', (e) => {
+        currentAlgorithm = e.target.value;
+        updateAlgoInfo(currentAlgorithm);
+      });
+
       document.getElementById('speedSlider').addEventListener('input', (e) => {
         stepDelay = parseInt(e.target.value);
         document.getElementById('delayVal').innerText = stepDelay + 'ms';
       });
+
+      document.getElementById('runGraphBtn').addEventListener('click', runSelectedGraphAlgorithm);
+      document.getElementById('resetGraphBtn').addEventListener('click', resetGraphState);
+
+      document.getElementById('scenarioBtn').addEventListener('click', () => {
+        const scenario = document.getElementById('scenarioSelector').value;
+        applyScenario(scenario);
+      });
+
+      updateAlgoInfo('dijkstra');
       drawGraph();
     }
 
     function resizeCanvas() {
-      canvas.width = canvas.parentElement.clientWidth;
-      canvas.height = canvas.parentElement.clientHeight - 10;
+      const parent = canvas.parentElement;
+      canvas.width = parent.clientWidth;
+      canvas.height = parent.clientHeight - 10;
+    }
+
+    function getScaledCoordinates(x, y) {
+      return {
+        x: x * (canvas.width / 750),
+        y: y * (canvas.height / 500)
+      };
     }
 
     function populateNodeSelectors() {
-      const s = document.getElementById('startNodeSelect');
-      const e = document.getElementById('endNodeSelect');
-      s.innerHTML = ''; e.innerHTML = '';
+      const startSelect = document.getElementById('startNodeSelect');
+      const endSelect = document.getElementById('endNodeSelect');
+      startSelect.innerHTML = '';
+      endSelect.innerHTML = '';
+
       CITY_NODES.forEach(n => {
-        s.innerHTML += `<option value="${n.id}">W${n.id}: ${n.name}</option>`;
-        e.innerHTML += `<option value="${n.id}">W${n.id}: ${n.name}</option>`;
+        startSelect.innerHTML += `<option value="${n.id}">W${n.id}: ${n.name}</option>`;
+        endSelect.innerHTML += `<option value="${n.id}">W${n.id}: ${n.name}</option>`;
       });
-      s.value = "0"; e.value = "7";
+
+      startSelect.value = "0";
+      endSelect.value = "7";
     }
 
     function drawGraph() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const scaleX = canvas.width / 750, scaleY = canvas.height / 500;
 
+      // Coordinate grid lines
+      ctx.strokeStyle = "#131b2e";
+      ctx.lineWidth = 0.5;
+      for (let x = 0; x < canvas.width; x += 40) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += 40) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+
+      // Draw Edges
       CITY_EDGES.forEach(edge => {
-        const u = CITY_NODES[edge.u], v = CITY_NODES[edge.v];
+        const u = CITY_NODES[edge.u];
+        const v = CITY_NODES[edge.v];
+        const p1 = getScaledCoordinates(u.x, u.y);
+        const p2 = getScaledCoordinates(v.x, v.y);
         const isHi = highlightedEdges.find(e => (e.u === edge.u && e.v === edge.v) || (e.u === edge.v && e.v === edge.u));
+
         ctx.beginPath();
-        ctx.moveTo(u.x * scaleX, u.y * scaleY);
-        ctx.lineTo(v.x * scaleX, v.y * scaleY);
-        ctx.strokeStyle = isHi ? "#10b981" : "#334155";
-        ctx.lineWidth = isHi ? 4 : 2;
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.strokeStyle = isHi ? (isHi.color || "#10b981") : "#334155";
+        ctx.lineWidth = isHi ? (isHi.width || 4) : 1.8;
         ctx.stroke();
 
-        const midX = (u.x * scaleX + v.x * scaleX) / 2;
-        const midY = (u.y * scaleY + v.y * scaleY) / 2;
+        const midX = (p1.x + p2.x) / 2;
+        const midY = (p1.y + p2.y) / 2;
         ctx.fillStyle = "#090d16";
-        ctx.fillRect(midX - 10, midY - 8, 20, 16);
-        ctx.fillStyle = isHi ? "#34d399" : "#94a3b8";
-        ctx.font = "bold 10px monospace";
-        ctx.fillText(edge.weight, midX - 3, midY + 4);
+        ctx.fillRect(midX - 11, midY - 9, 22, 18);
+        ctx.strokeRect(midX - 11, midY - 9, 22, 18);
+        ctx.fillStyle = isHi ? "#67e8f9" : "#94a3b8";
+        ctx.font = "bold 10px JetBrains Mono, monospace";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(edge.weight, midX, midY);
       });
 
+      // Draw Nodes
       CITY_NODES.forEach(node => {
-        const px = node.x * scaleX, py = node.y * scaleY;
+        const p = getScaledCoordinates(node.x, node.y);
         const isHi = highlightedNodes.has(node.id);
+
+        if (isHi) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 22, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(6, 182, 212, 0.25)";
+          ctx.fill();
+        }
+
         ctx.beginPath();
-        ctx.arc(px, py, 14, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 14, 0, Math.PI * 2);
         ctx.fillStyle = isHi ? "#06b6d4" : node.color;
         ctx.fill();
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 2;
         ctx.stroke();
+
         ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 10px monospace";
-        ctx.fillText(node.id, px - 3, py + 3);
+        ctx.font = "bold 11px JetBrains Mono, monospace";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(node.id, p.x, p.y);
+
+        ctx.fillStyle = "#e2e8f0";
+        ctx.font = "10px Plus Jakarta Sans, sans-serif";
+        ctx.fillText(node.name, p.x, p.y + 24);
+
+        if (nodeDistances[node.id] !== undefined) {
+          ctx.fillStyle = "#38bdf8";
+          ctx.font = "bold 10px JetBrains Mono, monospace";
+          ctx.fillText(`dist: ${nodeDistances[node.id] === Infinity ? '∞' : nodeDistances[node.id]}`, p.x, p.y + 36);
+        }
       });
     }
 
+    function logTrace(msg, color = "text-slate-300") {
+      const container = document.getElementById('graphExecutionLog');
+      const stepBadge = document.getElementById('stepCounterBadge');
+      const entry = document.createElement('div');
+      entry.className = `${color} transition-all`;
+      entry.innerHTML = `<span class="text-slate-600 font-mono">></span> ${msg}`;
+      container.appendChild(entry);
+      container.scrollTop = container.scrollHeight;
+      stepBadge.innerText = `${container.childElementCount - 1} steps`;
+    }
+
+    function clearTrace() {
+      document.getElementById('graphExecutionLog').innerHTML = '';
+      document.getElementById('stepCounterBadge').innerText = '0 steps';
+    }
+
     function resetGraphState() {
+      if (animationTimer) clearTimeout(animationTimer);
+      isRunning = false;
       highlightedNodes.clear();
       highlightedEdges = [];
-      document.getElementById('graphExecutionLog').innerHTML = '';
+      nodeDistances = {};
+      clearTrace();
       document.getElementById('metricTotalCost').innerText = '--';
       document.getElementById('metricVertexCount').innerText = '--';
+      document.getElementById('metricConvergence').innerText = '0.0 ms';
       drawGraph();
     }
 
-    async function runSelectedGraphAlgorithm() {
-      resetGraphState();
-      const algo = document.getElementById('graphAlgoSelect').value;
-      const start = parseInt(document.getElementById('startNodeSelect').value);
-      const end = parseInt(document.getElementById('endNodeSelect').value);
+    function updateAlgoInfo(algo) {
+      const pathGrp = document.getElementById('pathSelectorGroup');
+      const nameDisp = document.getElementById('algoNameDisplay');
+      const timeDisp = document.getElementById('timeComplexityDisplay');
+      const spaceDisp = document.getElementById('spaceComplexityDisplay');
+      const paraDisp = document.getElementById('paradigmDisplay');
+
+      pathGrp.classList.toggle('hidden', !['dijkstra', 'bellman', 'bfs', 'dfs'].includes(algo));
 
       if (algo === 'dijkstra') {
-        const dist = Array(CITY_NODES.length).fill(Infinity);
-        const prev = Array(CITY_NODES.length).fill(null);
-        dist[start] = 0;
-        const pq = new Set(CITY_NODES.map(n => n.id));
-
-        while (pq.size > 0) {
-          let u = null;
-          pq.forEach(node => { if (u === null || dist[node] < dist[u]) u = node; });
-          if (dist[u] === Infinity || u === end) break;
-          pq.delete(u);
-          highlightedNodes.add(u);
-          drawGraph();
-          await new Promise(r => setTimeout(r, stepDelay));
-
-          CITY_EDGES.filter(e => e.u === u || e.v === u).forEach(e => {
-            const v = e.u === u ? e.v : e.u;
-            if (pq.has(v) && dist[u] + e.weight < dist[v]) {
-              dist[v] = dist[u] + e.weight;
-              prev[v] = u;
-            }
-          });
-        }
-        let cur = end;
-        while (cur !== null && prev[cur] !== null) {
-          highlightedEdges.push({ u: prev[cur], v: cur });
-          cur = prev[cur];
-        }
-        document.getElementById('metricTotalCost').innerText = dist[end] + " mins";
-        drawGraph();
+        nameDisp.innerText = "Dijkstra's Single-Source Shortest Path";
+        timeDisp.innerText = "O((V + E) log V)";
+        spaceDisp.innerText = "O(V) Priority Queue";
+        paraDisp.innerText = "Greedy Paradigm with Min-Heap State Search";
+      } else if (algo === 'bellman') {
+        nameDisp.innerText = "Bellman-Ford Dynamic Relaxations";
+        timeDisp.innerText = "O(V · E)";
+        spaceDisp.innerText = "O(V) Distance Array";
+        paraDisp.innerText = "Dynamic Programming (Negative Weight Safe)";
       } else if (algo === 'kruskal') {
-        const sorted = [...CITY_EDGES].sort((a, b) => a.weight - b.weight);
-        const parent = Array.from({ length: CITY_NODES.length }, (_, i) => i);
-        function find(i) { return parent[i] === i ? i : (parent[i] = find(parent[i])); }
-        let cost = 0;
-        for (const e of sorted) {
-          const rootU = find(e.u), rootV = find(e.v);
-          if (rootU !== rootV) {
-            parent[rootU] = rootV;
-            cost += e.weight;
-            highlightedEdges.push({ u: e.u, v: e.v });
-            highlightedNodes.add(e.u); highlightedNodes.add(e.v);
-            drawGraph();
-            await new Promise(r => setTimeout(r, stepDelay));
+        nameDisp.innerText = "Kruskal's Minimum Spanning Tree (MST)";
+        timeDisp.innerText = "O(E log E) ≈ O(E log V)";
+        spaceDisp.innerText = "O(V) Disjoint Set Union";
+        paraDisp.innerText = "Greedy Strategy + Cycle Detection via DSU";
+      } else if (algo === 'prim') {
+        nameDisp.innerText = "Prim's Minimum Spanning Tree (MST)";
+        timeDisp.innerText = "O((V + E) log V)";
+        spaceDisp.innerText = "O(V) Priority Queue";
+        paraDisp.innerText = "Greedy Cut-Property Subtree Expansion";
+      } else if (algo === 'bfs') {
+        nameDisp.innerText = "Breadth-First Search (BFS)";
+        timeDisp.innerText = "O(V + E)";
+        spaceDisp.innerText = "O(V) FIFO Queue";
+        paraDisp.innerText = "Layer-by-Layer Unweighted Reachability";
+      } else if (algo === 'dfs') {
+        nameDisp.innerText = "Depth-First Search (DFS)";
+        timeDisp.innerText = "O(V + E)";
+        spaceDisp.innerText = "O(V) Recursion Stack";
+        paraDisp.innerText = "Exhaustive Backtracking & Component Isolation";
+      }
+    }
+
+    async function runSelectedGraphAlgorithm() {
+      if (isRunning) return;
+      resetGraphState();
+      isRunning = true;
+      const startNode = parseInt(document.getElementById('startNodeSelect').value);
+      const endNode = parseInt(document.getElementById('endNodeSelect').value);
+      const startTime = performance.now();
+
+      if (currentAlgorithm === 'dijkstra') await executeDijkstra(startNode, endNode);
+      else if (currentAlgorithm === 'bellman') await executeBellmanFord(startNode, endNode);
+      else if (currentAlgorithm === 'kruskal') await executeKruskalMST();
+      else if (currentAlgorithm === 'prim') await executePrimMST(startNode);
+      else if (currentAlgorithm === 'bfs') await executeBFS(startNode, endNode);
+      else if (currentAlgorithm === 'dfs') await executeDFS(startNode, endNode);
+
+      const endTime = performance.now();
+      document.getElementById('metricConvergence').innerText = (endTime - startTime).toFixed(1) + ' ms';
+      isRunning = false;
+    }
+
+    // Graph Algorithm Implementations
+    async function executeDijkstra(source, target) {
+      logTrace(`Initializing Dijkstra's Search from source [${source}]`, "text-cyan-400 font-bold");
+      const dist = {}, prev = {}, unvisited = new Set();
+      CITY_NODES.forEach(n => { dist[n.id] = Infinity; nodeDistances[n.id] = Infinity; unvisited.add(n.id); });
+      dist[source] = 0; nodeDistances[source] = 0;
+      drawGraph();
+
+      while (unvisited.size > 0) {
+        let u = null;
+        unvisited.forEach(nodeId => { if (u === null || dist[nodeId] < dist[u]) u = nodeId; });
+        if (dist[u] === Infinity || u === target) break;
+        unvisited.delete(u);
+        highlightedNodes.add(u);
+        drawGraph();
+        logTrace(`Greedy extract-min node [${u}] (${CITY_NODES[u].name}) with cost=${dist[u]}`);
+        await sleep(stepDelay);
+
+        for (const edge of CITY_EDGES.filter(e => e.u === u || e.v === u)) {
+          const v = edge.u === u ? edge.v : edge.u;
+          if (unvisited.has(v)) {
+            const alt = dist[u] + edge.weight;
+            if (alt < dist[v]) {
+              logTrace(`Relax edge (${u} ⇄ ${v}): dist[${v}] updated from ${dist[v]} to ${alt}`, "text-emerald-400");
+              dist[v] = alt; nodeDistances[v] = alt; prev[v] = u;
+              highlightedEdges.push({ u, v, color: "#38bdf8", width: 3 });
+              drawGraph();
+              await sleep(stepDelay / 2);
+            }
           }
         }
-        document.getElementById('metricTotalCost').innerText = cost + " units";
       }
+
+      highlightedEdges = [];
+      const path = [];
+      let curr = target;
+      while (curr !== undefined) { path.unshift(curr); curr = prev[curr]; }
+      for (let i = 0; i < path.length - 1; i++) highlightedEdges.push({ u: path[i], v: path[i + 1], color: "#10b981", width: 5 });
+      drawGraph();
+      logTrace(`Optimal Route Found: ${path.join(" ➔ ")} (Delay = ${dist[target]} mins)`, "text-emerald-400 font-bold");
+      document.getElementById('metricTotalCost').innerText = dist[target] + " mins";
+      document.getElementById('metricVertexCount').innerText = path.length + " wards";
+    }
+
+    async function executeBellmanFord(source, target) {
+      logTrace(`Executing Bellman-Ford |V|-1 Relaxation Passes`, "text-cyan-400 font-bold");
+      const dist = {}, prev = {};
+      CITY_NODES.forEach(n => { dist[n.id] = Infinity; nodeDistances[n.id] = Infinity; });
+      dist[source] = 0; nodeDistances[source] = 0;
+      drawGraph();
+
+      for (let i = 1; i <= CITY_NODES.length - 1; i++) {
+        let changed = false;
+        for (const edge of CITY_EDGES) {
+          for (const [u, v] of [[edge.u, edge.v], [edge.v, edge.u]]) {
+            if (dist[u] !== Infinity && dist[u] + edge.weight < dist[v]) {
+              dist[v] = dist[u] + edge.weight; nodeDistances[v] = dist[v]; prev[v] = u;
+              changed = true;
+              highlightedNodes.add(v);
+              highlightedEdges.push({ u, v, color: "#f59e0b", width: 3 });
+              drawGraph();
+              await sleep(stepDelay / 3);
+            }
+          }
+        }
+        if (!changed) break;
+      }
+
+      highlightedEdges = [];
+      const path = [];
+      let curr = target;
+      while (curr !== undefined) { path.unshift(curr); curr = prev[curr]; }
+      for (let i = 0; i < path.length - 1; i++) highlightedEdges.push({ u: path[i], v: path[i + 1], color: "#10b981", width: 5 });
+      drawGraph();
+      document.getElementById('metricTotalCost').innerText = dist[target] + " mins";
+      document.getElementById('metricVertexCount').innerText = path.length + " wards";
+    }
+
+    async function executeKruskalMST() {
+      logTrace(`Executing Kruskal's MST (Edge weight sorting + DSU)`, "text-cyan-400 font-bold");
+      const sortedEdges = [...CITY_EDGES].sort((a, b) => a.weight - b.weight);
+      const parent = {};
+      CITY_NODES.forEach(n => parent[n.id] = n.id);
+      function find(i) { return parent[i] === i ? i : (parent[i] = find(parent[i])); }
+      function union(i, j) {
+        const rootI = find(i), rootJ = find(j);
+        if (rootI !== rootJ) { parent[rootI] = rootJ; return true; }
+        return false;
+      }
+
+      let mstCost = 0, edgesCount = 0;
+      highlightedEdges = [];
+
+      for (const edge of sortedEdges) {
+        highlightedNodes.add(edge.u); highlightedNodes.add(edge.v);
+        drawGraph();
+        await sleep(stepDelay / 2);
+
+        if (union(edge.u, edge.v)) {
+          mstCost += edge.weight; edgesCount++;
+          highlightedEdges.push({ u: edge.u, v: edge.v, color: "#10b981", width: 4 });
+          logTrace(`✓ Accepted Edge into MST: (${edge.u} ⇄ ${edge.v}) [w=${edge.weight}]`, "text-emerald-400");
+          drawGraph();
+          await sleep(stepDelay);
+        }
+        if (edgesCount === CITY_NODES.length - 1) break;
+      }
+
+      document.getElementById('metricTotalCost').innerText = mstCost + " units";
+      document.getElementById('metricVertexCount').innerText = CITY_NODES.length + " wards";
+    }
+
+    async function executePrimMST(startNode) {
+      logTrace(`Starting Prim's MST from Ward [${startNode}]`, "text-cyan-400 font-bold");
+      const visited = new Set([startNode]);
+      highlightedNodes.add(startNode);
+      highlightedEdges = [];
+      let totalCost = 0;
+
+      while (visited.size < CITY_NODES.length) {
+        let minEdge = null, minWeight = Infinity;
+        for (const edge of CITY_EDGES) {
+          const uIn = visited.has(edge.u), vIn = visited.has(edge.v);
+          if ((uIn && !vIn) || (!uIn && vIn)) {
+            if (edge.weight < minWeight) { minWeight = edge.weight; minEdge = edge; }
+          }
+        }
+        if (!minEdge) break;
+
+        const nextNode = visited.has(minEdge.u) ? minEdge.v : minEdge.u;
+        visited.add(nextNode);
+        highlightedNodes.add(nextNode);
+        highlightedEdges.push({ u: minEdge.u, v: minEdge.v, color: "#10b981", width: 4 });
+        totalCost += minEdge.weight;
+        logTrace(`Prim Cut Added: [${nextNode}] via (${minEdge.u} ⇄ ${minEdge.v})`, "text-emerald-400");
+        drawGraph();
+        await sleep(stepDelay);
+      }
+
+      document.getElementById('metricTotalCost').innerText = totalCost + " units";
+      document.getElementById('metricVertexCount').innerText = visited.size + " wards";
+    }
+
+    async function executeBFS(source, target) {
+      logTrace(`Executing Breadth-First Search (FIFO Queue)`, "text-cyan-400 font-bold");
+      const queue = [source], visited = new Set([source]), prev = {};
+      highlightedNodes.add(source);
+      drawGraph();
+
+      while (queue.length > 0) {
+        const u = queue.shift();
+        logTrace(`BFS dequeued node [${u}] (${CITY_NODES[u].name})`, "text-cyan-300");
+        await sleep(stepDelay);
+        if (u === target) break;
+
+        for (const edge of CITY_EDGES.filter(e => e.u === u || e.v === u)) {
+          const v = edge.u === u ? edge.v : edge.u;
+          if (!visited.has(v)) {
+            visited.add(v); prev[v] = u; queue.push(v);
+            highlightedNodes.add(v);
+            highlightedEdges.push({ u, v, color: "#38bdf8", width: 3 });
+            drawGraph();
+            await sleep(stepDelay / 2);
+          }
+        }
+      }
+
+      highlightedEdges = [];
+      const path = [];
+      let cur = target;
+      while (cur !== undefined) { path.unshift(cur); cur = prev[cur]; }
+      for (let i = 0; i < path.length - 1; i++) highlightedEdges.push({ u: path[i], v: path[i + 1], color: "#10b981", width: 4 });
+      drawGraph();
+      document.getElementById('metricTotalCost').innerText = (path.length - 1) + " hops";
+      document.getElementById('metricVertexCount').innerText = path.length + " wards";
+    }
+
+    async function executeDFS(source, target) {
+      logTrace(`Executing Depth-First Search (Backtracking)`, "text-cyan-400 font-bold");
+      const visited = new Set(), path = [];
+      let found = false;
+
+      async function dfs(u) {
+        if (found) return;
+        visited.add(u); path.push(u); highlightedNodes.add(u);
+        drawGraph();
+        logTrace(`DFS visiting node [${u}]`, "text-amber-300");
+        await sleep(stepDelay);
+        if (u === target) { found = true; return; }
+
+        for (const edge of CITY_EDGES.filter(e => e.u === u || e.v === u)) {
+          const v = edge.u === u ? edge.v : edge.u;
+          if (!visited.has(v) && !found) {
+            highlightedEdges.push({ u, v, color: "#f59e0b", width: 3 });
+            await dfs(v);
+          }
+        }
+        if (!found) path.pop();
+      }
+
+      await dfs(source);
+      highlightedEdges = [];
+      for (let i = 0; i < path.length - 1; i++) highlightedEdges.push({ u: path[i], v: path[i + 1], color: "#10b981", width: 4 });
+      drawGraph();
+      document.getElementById('metricTotalCost').innerText = path.length + " explored";
+      document.getElementById('metricVertexCount').innerText = path.length + " wards";
     }
 
     function toggleFloydWarshallModal() {
@@ -576,20 +1289,23 @@
       modal.classList.toggle('hidden');
       if (!modal.classList.contains('hidden')) {
         const V = CITY_NODES.length;
-        const dist = Array.from({ length: V }, () => Array(V).fill(Infinity));
-        for (let i = 0; i < V; i++) dist[i][i] = 0;
-        CITY_EDGES.forEach(e => { dist[e.u][e.v] = e.weight; dist[e.v][e.u] = e.weight; });
+        const matrix = Array.from({ length: V }, () => Array(V).fill(Infinity));
+        for (let i = 0; i < V; i++) matrix[i][i] = 0;
+        CITY_EDGES.forEach(e => { matrix[e.u][e.v] = e.weight; matrix[e.v][e.u] = e.weight; });
         for (let k = 0; k < V; k++)
           for (let i = 0; i < V; i++)
             for (let j = 0; j < V; j++)
-              dist[i][j] = Math.min(dist[i][j], dist[i][k] + dist[k][j]);
+              if (matrix[i][k] + matrix[k][j] < matrix[i][j]) matrix[i][j] = matrix[i][k] + matrix[k][j];
 
-        let html = '<table class="w-full text-center border-collapse"><thead><tr class="bg-slate-900 text-cyan-400"><th>W</th>';
-        for (let i = 0; i < V; i++) html += `<th class="p-1">W${i}</th>`;
+        let html = '<table class="w-full text-center border-collapse"><thead><tr class="bg-slate-900 text-cyan-400 border-b border-slate-800"><th>Ward (i \\ j)</th>';
+        for (let i = 0; i < V; i++) html += `<th class="p-2 border border-slate-800">W${i}</th>`;
         html += '</tr></thead><tbody>';
         for (let i = 0; i < V; i++) {
-          html += `<tr><td class="p-1 font-bold text-slate-300">W${i}</td>`;
-          for (let j = 0; j < V; j++) html += `<td class="p-1 border border-slate-800 text-emerald-400">${dist[i][j]}</td>`;
+          html += `<tr class="border-b border-slate-800/80"><td class="p-2 font-bold text-slate-300 bg-slate-900/80 border border-slate-800">W${i} (${CITY_NODES[i].name})</td>`;
+          for (let j = 0; j < V; j++) {
+            const val = matrix[i][j] === Infinity ? '∞' : matrix[i][j];
+            html += `<td class="p-2 border border-slate-800/60 ${i === j ? 'text-slate-600' : 'text-emerald-400 font-bold'}">${val}</td>`;
+          }
           html += '</tr>';
         }
         html += '</tbody></table>';
@@ -597,10 +1313,184 @@
       }
     }
 
-    // LCS IMPLEMENTATION
+    function sleep(ms) {
+      return new Promise(resolve => { animationTimer = setTimeout(resolve, ms); });
+    }
+
+    // 2. KNAPSACK MODULE (TABULATION & MEMOIZATION)
+    let knapItems = [
+      { id: 1, name: "Liquid Medical Oxygen", weight: 10, value: 60, divisible: true },
+      { id: 2, name: "Mobile ICU Unit", weight: 20, value: 100, divisible: false },
+      { id: 3, name: "Disaster Food Rations", weight: 30, value: 120, divisible: true },
+      { id: 4, name: "High-Capacity Generators", weight: 15, value: 75, divisible: false },
+      { id: 5, name: "Clean Water Purifier", weight: 25, value: 90, divisible: true }
+    ];
+    let is1DSpaceOpt = false;
+
+    function initKnapsackModule() {
+      document.getElementById('knapCapacitySlider').addEventListener('input', (e) => {
+        document.getElementById('knapCapacityDisplay').innerText = e.target.value + ' Tons';
+        solveBothKnapsacks();
+      });
+      renderKnapsackTable();
+      solveBothKnapsacks();
+    }
+
+    function renderKnapsackTable() {
+      const tbody = document.getElementById('knapItemTableBody');
+      tbody.innerHTML = '';
+      knapItems.forEach((item) => {
+        const ratio = (item.value / item.weight).toFixed(2);
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/40";
+        tr.innerHTML = `
+          <td class="p-2 font-semibold text-slate-200">${item.name}</td>
+          <td class="p-2 text-slate-300">${item.weight} t</td>
+          <td class="p-2 text-slate-300">${item.value} pts</td>
+          <td class="p-2 font-bold text-amber-400">${ratio}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function addNewKnapsackItem() {
+      const name = document.getElementById('newItemName').value.trim() || "Emergency Unit";
+      const weight = parseInt(document.getElementById('newItemWeight').value) || 10;
+      const value = parseInt(document.getElementById('newItemValue').value) || 50;
+      knapItems.push({ id: knapItems.length + 1, name, weight, value, divisible: false });
+      document.getElementById('newItemName').value = '';
+      renderKnapsackTable();
+      solveBothKnapsacks();
+    }
+
+    function resetKnapsackItems() {
+      knapItems = [
+        { id: 1, name: "Liquid Medical Oxygen", weight: 10, value: 60, divisible: true },
+        { id: 2, name: "Mobile ICU Unit", weight: 20, value: 100, divisible: false },
+        { id: 3, name: "Disaster Food Rations", weight: 30, value: 120, divisible: true },
+        { id: 4, name: "High-Capacity Generators", weight: 15, value: 75, divisible: false },
+        { id: 5, name: "Clean Water Purifier", weight: 25, value: 90, divisible: true }
+      ];
+      renderKnapsackTable();
+      solveBothKnapsacks();
+    }
+
+    function toggleDpSpaceOpt() {
+      is1DSpaceOpt = !is1DSpaceOpt;
+      document.getElementById('dpSpaceToggleBtn').innerText = is1DSpaceOpt ? "Switch to 2D Table (O(nW))" : "Toggle 1D Space Optim (O(W))";
+      solveBothKnapsacks();
+    }
+
+    function solveBothKnapsacks() {
+      const capacity = parseInt(document.getElementById('knapCapacitySlider').value);
+
+      // Fractional Greedy
+      const sortedByRatio = [...knapItems].sort((a, b) => (b.value / b.weight) - (a.value / a.weight));
+      let curWeight = 0, fractionalTotalValue = 0;
+      const fractionalList = [];
+
+      for (const item of sortedByRatio) {
+        if (curWeight + item.weight <= capacity) {
+          curWeight += item.weight; fractionalTotalValue += item.value;
+          fractionalList.push(`100% of ${item.name} (+${item.value} pts)`);
+        } else {
+          const remain = capacity - curWeight;
+          if (remain > 0) {
+            const fraction = remain / item.weight;
+            fractionalTotalValue += item.value * fraction;
+            fractionalList.push(`${(fraction * 100).toFixed(0)}% of ${item.name} (+${(item.value * fraction).toFixed(1)} pts)`);
+          }
+          break;
+        }
+      }
+      document.getElementById('fractionalResultValue').innerText = fractionalTotalValue.toFixed(1) + " pts";
+      document.getElementById('fractionalItemsList').innerHTML = fractionalList.map(s => `<div>• ${s}</div>`).join('');
+
+      // 0/1 Tabulation DP
+      const n = knapItems.length;
+      const dp = Array.from({ length: n + 1 }, () => Array(capacity + 1).fill(0));
+
+      for (let i = 1; i <= n; i++) {
+        const wt = knapItems[i - 1].weight;
+        const val = knapItems[i - 1].value;
+        for (let w = 0; w <= capacity; w++) {
+          if (wt <= w) dp[i][w] = Math.max(dp[i - 1][w], dp[i - 1][w - wt] + val);
+          else dp[i][w] = dp[i - 1][w];
+        }
+      }
+      document.getElementById('discreteResultValue').innerText = dp[n][capacity] + " pts";
+
+      // Selected items backtracking
+      let resW = capacity;
+      const discreteSelected = [];
+      for (let i = n; i > 0 && resW > 0; i--) {
+        if (dp[i][resW] !== dp[i - 1][resW]) {
+          discreteSelected.push(knapItems[i - 1]);
+          resW -= knapItems[i - 1].weight;
+        }
+      }
+      document.getElementById('discreteItemsList').innerHTML = discreteSelected.map(it => `<div>• [Picked] ${it.name} (${it.weight}t ➔ ${it.value}pts)</div>`).join('');
+
+      // Top-Down Memoization Simulation Trace
+      const memoTrace = [];
+      const memoCache = {};
+      function memoizeKnap(idx, remW) {
+        const key = `${idx}-${remW}`;
+        if (idx === 0 || remW === 0) return 0;
+        if (memoCache[key] !== undefined) {
+          memoTrace.push(`Cache Hit: [Item ${idx}, Cap ${remW}] ➔ ${memoCache[key]} pts`);
+          return memoCache[key];
+        }
+        const item = knapItems[idx - 1];
+        if (item.weight > remW) {
+          memoCache[key] = memoizeKnap(idx - 1, remW);
+        } else {
+          memoCache[key] = Math.max(memoizeKnap(idx - 1, remW), memoizeKnap(idx - 1, remW - item.weight) + item.value);
+        }
+        return memoCache[key];
+      }
+      memoizeKnap(n, capacity);
+      document.getElementById('memoizationTraceBox').innerHTML = memoTrace.slice(0, 8).map(s => `<div>↳ ${s}</div>`).join('') + `<div class="text-cyan-400 font-bold mt-1">Total Recursive Subproblems Cached: ${Object.keys(memoCache).length}</div>`;
+
+      // Render DP table
+      renderDpTable(dp, capacity, n);
+    }
+
+    function renderDpTable(dp, capacity, n) {
+      const table = document.getElementById('dpVisualTable');
+      table.innerHTML = '';
+
+      if (is1DSpaceOpt) {
+        const rolling = dp[n];
+        let headerRow = `<tr class="bg-slate-900 text-slate-400 border-b border-slate-800"><th class="p-1">State</th>`;
+        let valRow = `<tr><td class="p-1 font-bold text-amber-400">dp[w]</td>`;
+        for (let w = 0; w <= capacity; w += Math.max(1, Math.floor(capacity / 12))) {
+          headerRow += `<th class="p-1">w=${w}</th>`;
+          valRow += `<td class="p-1 border border-slate-800">${rolling[w]}</td>`;
+        }
+        table.innerHTML = headerRow + `</tr>` + valRow + `</tr>`;
+        return;
+      }
+
+      const stepW = Math.max(1, Math.floor(capacity / 10));
+      let header = `<tr class="bg-slate-900 text-slate-400 border-b border-slate-800"><th class="p-1 text-left">i \\ w</th>`;
+      for (let w = 0; w <= capacity; w += stepW) header += `<th class="p-1">${w}</th>`;
+      table.innerHTML += header + `</tr>`;
+
+      for (let i = 0; i <= n; i++) {
+        let row = `<tr class="border-b border-slate-800/60"><td class="p-1 text-left font-bold text-cyan-300">${i === 0 ? "0 (Init)" : knapItems[i-1].name.substring(0, 10)}</td>`;
+        for (let w = 0; w <= capacity; w += stepW) {
+          const isOptimalCell = (i === n && w === capacity);
+          row += `<td class="p-1 border-r border-slate-900 ${isOptimalCell ? 'dp-picked' : ''}">${dp[i][w]}</td>`;
+        }
+        table.innerHTML += row + `</tr>`;
+      }
+    }
+
+    // 3. LCS & OBST MODULE
     function computeLCS() {
-      const s1 = document.getElementById('lcsStr1').value.toUpperCase();
-      const s2 = document.getElementById('lcsStr2').value.toUpperCase();
+      const s1 = document.getElementById('lcsStr1').value.toUpperCase().trim() || "HOSPITAL";
+      const s2 = document.getElementById('lcsStr2').value.toUpperCase().trim() || "DISPATCH";
       const m = s1.length, n = s2.length;
       const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
 
@@ -618,23 +1508,25 @@
         else j--;
       }
 
-      document.getElementById('lcsResultText').innerText = `LCS Result: "${lcs}" (Length = ${dp[m][n]})`;
+      document.getElementById('lcsResultText').innerHTML = `Consensus Subsequence: <span class="text-white bg-emerald-950 px-2 py-0.5 rounded border border-emerald-700">"${lcs}"</span> (Length = ${dp[m][n]})`;
 
-      let html = '<table class="w-full text-center border-collapse"><tr><th></th><th>ε</th>';
-      for (let c of s2) html += `<th>${c}</th>`;
-      html += '</tr>';
+      let html = '<table class="w-full text-center border-collapse"><thead><tr class="bg-slate-900 text-cyan-400"><th></th><th>ε</th>';
+      for (const char of s2) html += `<th class="p-1 border border-slate-800">${char}</th>`;
+      html += '</tr></thead><tbody>';
       for (let r = 0; r <= m; r++) {
-        html += `<tr><td class="font-bold text-cyan-400">${r === 0 ? 'ε' : s1[r - 1]}</td>`;
-        for (let c = 0; c <= n; c++) html += `<td class="p-1 border border-slate-800">${dp[r][c]}</td>`;
+        html += `<tr><td class="p-1 font-bold text-cyan-400 bg-slate-900 border border-slate-800">${r === 0 ? 'ε' : s1[r - 1]}</td>`;
+        for (let c = 0; c <= n; c++) {
+          const isLcsCell = (r > 0 && c > 0 && s1[r-1] === s2[c-1]);
+          html += `<td class="p-1 border border-slate-800/60 ${isLcsCell ? 'dp-picked' : 'text-slate-300'}">${dp[r][c]}</td>`;
+        }
         html += '</tr>';
       }
-      html += '</table>';
+      html += '</tbody></table>';
       document.getElementById('lcsMatrixContainer').innerHTML = html;
     }
 
-    // OPTIMAL BST IMPLEMENTATION
     function computeOBST() {
-      const keys = ["W1", "W2", "W3", "W4"];
+      const keys = ["Ward 1", "Ward 2", "Ward 3", "Ward 4"];
       const p = [0.1, 0.2, 0.4, 0.3];
       const n = keys.length;
       const e = Array.from({ length: n + 2 }, () => Array(n + 1).fill(0));
@@ -654,130 +1546,562 @@
         }
       }
 
+      const optRoot = keys[root[1][n] - 1];
       document.getElementById('obstOutputBox').innerHTML = `
-        <span class="text-emerald-400 font-bold">Optimal BST Evaluated:</span><br>
-        Expected Search Cost: <strong>${e[1][n].toFixed(2)}</strong> comparisons.<br>
-        Optimal Root Ward: <strong>${keys[root[1][n] - 1]}</strong> (Minimizes Tree Depth Weighted Cost).<br>
-        Left Subtree: ${root[1][root[1][n]-1] ? keys[root[1][root[1][n]-1]-1] : "None"} | Right Subtree: ${root[root[1][n]+1][n] ? keys[root[root[1][n]+1][n]-1] : "None"}
+        <div class="text-emerald-400 font-bold">Optimal Tree Root: ${optRoot}</div>
+        <div>Expected Minimum Search Depth Cost: <strong class="text-cyan-300">${e[1][n].toFixed(2)} comparisons</strong></div>
+        <div class="text-slate-400 mt-1">Left Subtree: <span class="text-amber-300">${root[1][root[1][n]-1] ? keys[root[1][root[1][n]-1]-1] : "None"}</span> | Right Subtree: <span class="text-amber-300">${root[root[1][n]+1][n] ? keys[root[root[1][n]+1][n]-1] : "None"}</span></div>
+        <div class="text-slate-500 text-[11px] mt-1">Constructed in $O(n^3)$ via optimal substructure table.</div>
       `;
     }
 
-    // KNAPSACK MODULE
-    const knapItems = [
-      { name: "Medical Oxygen", weight: 10, value: 60 },
-      { name: "ICU Trailer", weight: 20, value: 100 },
-      { name: "Ration Crates", weight: 30, value: 120 },
-      { name: "Generators", weight: 15, value: 75 }
+    // 4. SCHEDULING MODULE (ACTIVITY SELECTION & JOB SEQUENCING)
+    const ACTIVITY_DATA = [
+      { id: "CORR-01", agency: "Police Escort VIP", start: 1, end: 4 },
+      { id: "CORR-02", agency: "Red Cross Ambulance", start: 3, end: 5 },
+      { id: "CORR-03", agency: "Fire Rescue Fleet", start: 0, end: 6 },
+      { id: "CORR-04", agency: "Hazmat Emergency", start: 5, end: 7 },
+      { id: "CORR-05", agency: "Blood Delivery Transit", start: 8, end: 9 },
+      { id: "CORR-06", agency: "National Guard Convoy", start: 5, end: 9 }
     ];
-    let is1DSpace = false;
 
-    function initKnapsackModule() {
-      document.getElementById('knapCapacitySlider').addEventListener('input', (e) => {
-        document.getElementById('knapCapacityDisplay').innerText = e.target.value + ' Tons';
-        solveBothKnapsacks();
+    const JOB_DATA = [
+      { id: "TASK-A", name: "High-Voltage Transformer Reboot", deadline: 2, profit: 100 },
+      { id: "TASK-B", name: "Subway Signaling Calibration", deadline: 1, profit: 50 },
+      { id: "TASK-C", name: "Water Main Pressure Purge", deadline: 2, profit: 80 },
+      { id: "TASK-D", name: "Gas Pipeline Sensor Patch", deadline: 3, profit: 60 },
+      { id: "TASK-E", name: "Emergency Radio Relay Sync", deadline: 1, profit: 20 }
+    ];
+
+    function initSchedulingModule() {
+      renderActivityTable();
+      renderJobTable();
+      runActivitySelection();
+      runJobSequencing();
+    }
+
+    function renderActivityTable() {
+      const tbody = document.getElementById('activityTableBody');
+      tbody.innerHTML = '';
+      ACTIVITY_DATA.forEach(act => {
+        const tr = document.createElement('tr');
+        tr.id = `act-row-${act.id}`;
+        tr.innerHTML = `
+          <td class="p-2 font-bold text-cyan-300">${act.id}</td>
+          <td class="p-2 text-slate-300">${act.agency}</td>
+          <td class="p-2 text-slate-400">${act.start}:00</td>
+          <td class="p-2 text-slate-400">${act.end}:00</td>
+          <td class="p-2" id="status-${act.id}"><span class="text-slate-500">Pending</span></td>
+        `;
+        tbody.appendChild(tr);
       });
-      renderKnapsackTable();
-      solveBothKnapsacks();
     }
 
-    function renderKnapsackTable() {
-      const tbody = document.getElementById('knapItemTableBody');
-      tbody.innerHTML = knapItems.map(item => `
-        <tr class="border-b border-slate-800"><td class="p-2">${item.name}</td><td class="p-2">${item.weight}t</td><td class="p-2">${item.value}</td></tr>
-      `).join('');
+    function runActivitySelection() {
+      const sorted = [...ACTIVITY_DATA].sort((a, b) => a.end - b.end);
+      const selected = [];
+      let lastEnd = -1;
+
+      sorted.forEach(act => {
+        const statusEl = document.getElementById(`status-${act.id}`);
+        if (act.start >= lastEnd) {
+          selected.push(act);
+          lastEnd = act.end;
+          if (statusEl) statusEl.innerHTML = `<span class="text-emerald-400 font-bold bg-emerald-950 px-1.5 py-0.5 rounded">Approved</span>`;
+        } else {
+          if (statusEl) statusEl.innerHTML = `<span class="text-rose-400 bg-rose-950 px-1.5 py-0.5 rounded">Conflict</span>`;
+        }
+      });
+
+      document.getElementById('activityAcceptedCount').innerText = `${selected.length} / ${ACTIVITY_DATA.length} Cleared`;
+
+      const gantt = document.getElementById('activityGantt');
+      gantt.innerHTML = '';
+      selected.forEach(act => {
+        const leftPercent = (act.start / 10) * 100;
+        const widthPercent = ((act.end - act.start) / 10) * 100;
+        const bar = document.createElement('div');
+        bar.className = "h-5 bg-gradient-to-r from-cyan-600 to-emerald-500 rounded text-[9px] font-mono text-slate-950 font-bold flex items-center px-2 truncate shadow";
+        bar.style.marginLeft = `${leftPercent}%`;
+        bar.style.width = `${widthPercent}%`;
+        bar.innerText = `${act.id} [${act.start}-${act.end}h]`;
+        gantt.appendChild(bar);
+      });
     }
 
-    function toggleDpSpaceOpt() {
-      is1DSpace = !is1DSpace;
-      document.getElementById('dpSpaceToggleBtn').innerText = is1DSpace ? "Switch to 2D (O(nW))" : "Toggle 1D Space (O(W))";
-      solveBothKnapsacks();
+    function renderJobTable() {
+      const tbody = document.getElementById('jobTableBody');
+      tbody.innerHTML = '';
+      JOB_DATA.forEach(job => {
+        const tr = document.createElement('tr');
+        tr.id = `job-row-${job.id}`;
+        tr.innerHTML = `
+          <td class="p-2 font-bold text-amber-400">${job.id}</td>
+          <td class="p-2 text-slate-300">${job.name}</td>
+          <td class="p-2 text-slate-400">t &le; ${job.deadline}</td>
+          <td class="p-2 text-emerald-400 font-bold">+${job.profit}</td>
+          <td class="p-2 font-mono" id="slot-assign-${job.id}">--</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
-    function solveBothKnapsacks() {
-      const W = parseInt(document.getElementById('knapCapacitySlider').value);
-      const n = knapItems.length;
-      const dp = Array.from({ length: n + 1 }, () => Array(W + 1).fill(0));
+    function runJobSequencing() {
+      const sorted = [...JOB_DATA].sort((a, b) => b.profit - a.profit);
+      const maxDeadline = Math.max(...JOB_DATA.map(j => j.deadline));
+      const slots = Array(maxDeadline + 1).fill(null);
+      let totalProfit = 0;
 
-      for (let i = 1; i <= n; i++) {
-        for (let w = 0; w <= W; w++) {
-          if (knapItems[i - 1].weight <= w)
-            dp[i][w] = Math.max(dp[i - 1][w], dp[i - 1][w - knapItems[i - 1].weight] + knapItems[i - 1].value);
-          else dp[i][w] = dp[i - 1][w];
+      sorted.forEach(job => {
+        for (let t = job.deadline; t > 0; t--) {
+          if (!slots[t]) {
+            slots[t] = job;
+            totalProfit += job.profit;
+            const assignEl = document.getElementById(`slot-assign-${job.id}`);
+            if (assignEl) assignEl.innerHTML = `<span class="text-cyan-400 font-bold">Slot ${t}</span>`;
+            break;
+          }
+        }
+      });
+
+      document.getElementById('totalJobProfit').innerText = `+${totalProfit} Resilience Pts`;
+
+      const slotContainer = document.getElementById('jobTimeSlots');
+      slotContainer.innerHTML = '';
+      for (let t = 1; t <= maxDeadline; t++) {
+        const job = slots[t];
+        const div = document.createElement('div');
+        div.className = `p-2 rounded border text-center ${job ? 'bg-amber-950/60 border-amber-600/50' : 'bg-slate-900 border-slate-800'}`;
+        div.innerHTML = `
+          <div class="text-[10px] text-slate-400 font-mono">Hour ${t}</div>
+          <div class="text-xs font-bold ${job ? 'text-amber-300' : 'text-slate-600'}">${job ? job.id : 'IDLE'}</div>
+        `;
+        slotContainer.appendChild(div);
+      }
+    }
+
+    // 5. SENSORS & D&C MODULE
+    let telemetryStream = [78, 23, 112, 45, 95, 14, 185, 33];
+    let sortChartInstance = null;
+
+    function initSensorModule() {
+      regenerateSensorTelemetry();
+      initSortingChart();
+      runSortingBenchmark();
+    }
+
+    function regenerateSensorTelemetry() {
+      telemetryStream = Array.from({ length: 8 }, () => Math.floor(Math.random() * 200) + 10);
+      const container = document.getElementById('sensorPillsContainer');
+      container.innerHTML = '';
+      telemetryStream.forEach((val, i) => {
+        const div = document.createElement('div');
+        div.className = "bg-slate-900 border border-slate-700/80 px-2.5 py-1 rounded text-xs font-mono flex items-center space-x-1.5";
+        div.innerHTML = `<span class="text-slate-500">W${i}:</span><span class="text-cyan-300 font-bold">${val}</span>`;
+        container.appendChild(div);
+      });
+      executeDncMaxMin();
+    }
+
+    function executeDncMaxMin() {
+      let comparisonCount = 0;
+      const visualTree = document.getElementById('dncTreeVisual');
+      visualTree.innerHTML = '';
+
+      function getMinMax(arr, low, high, depth = 0) {
+        const indent = "&nbsp;".repeat(depth * 3);
+        if (low === high) {
+          visualTree.innerHTML += `<div>${indent}↳ Base Leaf [${low}]: val=${arr[low]}</div>`;
+          return { min: arr[low], max: arr[low] };
+        }
+        if (high === low + 1) {
+          comparisonCount++;
+          const mn = Math.min(arr[low], arr[high]);
+          const mx = Math.max(arr[low], arr[high]);
+          visualTree.innerHTML += `<div>${indent}↳ Pair Comparison [${low}, ${high}]: comp(${arr[low]}, ${arr[high]}) ➔ min:${mn}, max:${mx}</div>`;
+          return { min: mn, max: mx };
+        }
+
+        const mid = Math.floor((low + high) / 2);
+        visualTree.innerHTML += `<div>${indent}⮑ Divide: [${low}..${mid}] vs [${mid+1}..${high}]</div>`;
+        const left = getMinMax(arr, low, mid, depth + 1);
+        const right = getMinMax(arr, mid + 1, high, depth + 1);
+
+        comparisonCount += 2;
+        const finalMin = Math.min(left.min, right.min);
+        const finalMax = Math.max(left.max, right.max);
+        visualTree.innerHTML += `<div>${indent}⬅ Combine: min(${left.min}, ${right.min})=${finalMin} | max(${left.max}, ${right.max})=${finalMax}</div>`;
+        return { min: finalMin, max: finalMax };
+      }
+
+      const res = getMinMax(telemetryStream, 0, telemetryStream.length - 1);
+      document.getElementById('minSensorVal').innerText = res.min + ' PPM';
+      document.getElementById('maxSensorVal').innerText = res.max + ' PPM';
+      const n = telemetryStream.length;
+      document.getElementById('comparisonCounterText').innerText = `D&C: ${Math.floor((3 * n) / 2) - 2} comps vs Naive: ${2 * n - 2} comps`;
+    }
+
+    function runBinarySearchTelemetry() {
+      const sorted = [...telemetryStream].sort((a, b) => a - b);
+      const target = parseInt(document.getElementById('binarySearchInput').value);
+      const resContainer = document.getElementById('binarySearchResult');
+      let low = 0, high = sorted.length - 1, comparisons = 0, foundIndex = -1;
+
+      while (low <= high) {
+        comparisons++;
+        const mid = Math.floor((low + high) / 2);
+        if (sorted[mid] === target) { foundIndex = mid; break; }
+        else if (sorted[mid] < target) low = mid + 1;
+        else high = mid - 1;
+      }
+
+      if (foundIndex !== -1) {
+        resContainer.innerHTML = `<span class="text-emerald-400 font-bold">Found ${target} at sorted index ${foundIndex} (${comparisons} comps)</span>`;
+      } else {
+        resContainer.innerHTML = `<span class="text-amber-400">Value ${target} not in stream (${comparisons} comps). Sorted: [${sorted.join(', ')}]</span>`;
+      }
+    }
+
+    function initSortingChart() {
+      const ctxChart = document.getElementById('sortBenchmarkChart').getContext('2d');
+      sortChartInstance = new Chart(ctxChart, {
+        type: 'bar',
+        data: {
+          labels: ['Merge Sort (D&C)', 'Quick Sort (Partition)'],
+          datasets: [{
+            label: 'Key Comparisons',
+            data: [0, 0],
+            backgroundColor: ['rgba(6, 182, 212, 0.7)', 'rgba(245, 158, 11, 0.7)'],
+            borderColor: ['#06b6d4', '#f59e0b'],
+            borderWidth: 1.5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+            x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function runSortingBenchmark() {
+      const n = parseInt(document.getElementById('sortSizeSlider').value);
+      document.getElementById('sortSizeLabel').innerText = `${n} Samples`;
+      const data1 = Array.from({ length: n }, () => Math.floor(Math.random() * 5000));
+      const data2 = [...data1];
+
+      let mergeOps = 0;
+      function mergeSort(arr) {
+        if (arr.length <= 1) return arr;
+        const mid = Math.floor(arr.length / 2);
+        return merge(mergeSort(arr.slice(0, mid)), mergeSort(arr.slice(mid)));
+      }
+      function merge(l, r) {
+        const out = [];
+        let i = 0, j = 0;
+        while (i < l.length && j < r.length) {
+          mergeOps++;
+          if (l[i] <= r[j]) out.push(l[i++]);
+          else out.push(r[j++]);
+        }
+        return out.concat(l.slice(i)).concat(r.slice(j));
+      }
+
+      const t0 = performance.now(); mergeSort(data1); const t1 = performance.now();
+
+      let quickOps = 0;
+      function quickSort(arr, low = 0, high = arr.length - 1) {
+        if (low < high) {
+          const pi = partition(arr, low, high);
+          quickSort(arr, low, pi - 1);
+          quickSort(arr, pi + 1, high);
         }
       }
-      document.getElementById('discreteResultValue').innerText = dp[n][W] + " pts";
-
-      const memoTrace = [];
-      function memo(i, w) {
-        if (i === 0 || w === 0) return 0;
-        memoTrace.push(`memo(${i}, ${w}) lookup`);
-        return dp[i][w];
+      function partition(arr, low, high) {
+        const pivot = arr[high];
+        let i = low - 1;
+        for (let j = low; j < high; j++) {
+          quickOps++;
+          if (arr[j] < pivot) { i++; [arr[i], arr[j]] = [arr[j], arr[i]]; }
+        }
+        [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+        return i + 1;
       }
-      memo(n, W);
-      document.getElementById('memoizationTraceBox').innerHTML = `
-        <span class="text-cyan-400 font-bold">Top-Down Memoized Cache Hits:</span><br>
-        ${memoTrace.slice(0, 5).join(" &rarr; ")} ... [Memoized ${n * W} Substates Saved]
-      `;
 
-      const table = document.getElementById('dpVisualTable');
-      table.innerHTML = '';
-      for (let i = 0; i <= n; i++) {
-        let r = '<tr>';
-        for (let w = 0; w <= W; w += 10) r += `<td class="p-1 border border-slate-800 ${i === n && w >= W - 10 ? 'dp-picked' : ''}">${dp[i][w]}</td>`;
-        r += '</tr>';
-        table.innerHTML += r;
+      const t2 = performance.now(); quickSort(data2); const t3 = performance.now();
+
+      document.getElementById('mergeSortTime').innerText = (t1 - t0).toFixed(2) + ' ms';
+      document.getElementById('mergeSortOps').innerText = mergeOps.toLocaleString() + ' ops';
+      document.getElementById('quickSortTime').innerText = (t3 - t2).toFixed(2) + ' ms';
+      document.getElementById('quickSortOps').innerText = quickOps.toLocaleString() + ' ops';
+
+      if (sortChartInstance) {
+        sortChartInstance.data.datasets[0].data = [mergeOps, quickOps];
+        sortChartInstance.update();
       }
     }
 
-    // SCHEDULING
-    function initSchedulingModule() {
-      document.getElementById('activityTableBody').innerHTML = `
-        <tr><td class="p-2">C-01</td><td class="p-2">1:00</td><td class="p-2">4:00</td><td class="p-2 text-emerald-400">Approved</td></tr>
-        <tr><td class="p-2">C-02</td><td class="p-2">3:00</td><td class="p-2">5:00</td><td class="p-2 text-rose-400">Conflict</td></tr>
-      `;
-      document.getElementById('jobTableBody').innerHTML = `
-        <tr><td class="p-2">Subway</td><td class="p-2">1 hr</td><td class="p-2">+100</td><td class="p-2 text-cyan-400">Slot 1</td></tr>
-        <tr><td class="p-2">Power</td><td class="p-2">2 hr</td><td class="p-2">+50</td><td class="p-2 text-cyan-400">Slot 2</td></tr>
-      `;
-    }
-    function runActivitySelection() { alert("Activity selection: Greedily sorted by finish time."); }
-    function runJobSequencing() { alert("Job sequencing: Greedily scheduled in latest open slots."); }
-
-    // SENSORS & D&C
-    function initSensorModule() { regenerateSensorTelemetry(); }
-    function regenerateSensorTelemetry() {
-      const arr = [45, 95, 23, 112, 14, 185];
-      document.getElementById('sensorPillsContainer').innerHTML = arr.map(v => `<span class="bg-slate-900 border border-slate-700 px-2 py-1 rounded text-xs">${v} PPM</span>`).join(' ');
-      document.getElementById('minSensorVal').innerText = "14 PPM";
-      document.getElementById('maxSensorVal').innerText = "185 PPM";
-    }
-    function runBinarySearchTelemetry() { document.getElementById('binarySearchResult').innerText = "Found value in O(log n)"; }
-    function runSortingBenchmark() {
-      document.getElementById('mergeSortOps').innerText = "672 ops (O(n log n))";
-      document.getElementById('quickSortOps').innerText = "540 ops (Avg Case)";
-    }
     function runStrassenDemo() {
-      document.getElementById('strassenResultBox').innerText = "7 Multiplications calculated (O(n^2.81) complexity).";
+      const A = [[2, 4], [5, 7]], B = [[3, 6], [1, 9]];
+      const M1 = (A[0][0] + A[1][1]) * (B[0][0] + B[1][1]);
+      const M2 = (A[1][0] + A[1][1]) * B[0][0];
+      const M3 = A[0][0] * (B[0][1] - B[1][1]);
+      const M4 = A[1][1] * (B[1][0] - B[0][0]);
+      const M5 = (A[0][0] + A[0][1]) * B[1][1];
+      const M6 = (A[1][0] - A[0][0]) * (B[0][0] + B[0][1]);
+      const M7 = (A[0][1] - A[1][1]) * (B[1][0] + B[1][1]);
+
+      const C00 = M1 + M4 - M5 + M7;
+      const C01 = M3 + M5;
+      const C10 = M2 + M4;
+      const C11 = M1 - M2 + M3 + M6;
+
+      document.getElementById('strassenResultBox').innerHTML = `
+        <div class="text-cyan-300 font-bold mb-1">Strassen 7 Submultiplications Evaluated:</div>
+        <div>M1=${M1}, M2=${M2}, M3=${M3}, M4=${M4}, M5=${M5}, M6=${M6}, M7=${M7}</div>
+        <div class="mt-2 text-emerald-400 font-bold">Flow Result Matrix C:</div>
+        <div>[ [${C00}, ${C01}], [${C10}, ${C11}] ]</div>
+        <div class="text-slate-400 text-[10px] mt-1">Multiplications saved: 7 vs 8 naive ($O(n^{2.81})$).</div>
+      `;
     }
 
-    // ASYMPTOTICS & NP LAB
+    // 6. ASYMPTOTIC LAB & NP SOLVERS
+    function initMasterTheoremModule() { solveMasterTheorem(); }
+
     function solveMasterTheorem() {
       const a = parseFloat(document.getElementById('masterA').value);
       const b = parseFloat(document.getElementById('masterB').value);
       const k = parseFloat(document.getElementById('masterK').value);
       const logba = Math.log(a) / Math.log(b);
-      document.getElementById('masterResultCard').innerText = logba === k 
-        ? `Case 2: log_b(a) = k \u2192 \u0398(n^${k} log n)` 
-        : (logba > k ? `Case 1: log_b(a) > k \u2192 \u0398(n^${logba.toFixed(2)})` : `Case 3: \u0398(n^${k})`);
+      const badge = document.getElementById('masterClassification');
+      const expl = document.getElementById('masterExplanation');
+      const crit = document.getElementById('masterCriticalExp');
+      const tree = document.getElementById('recursionTreeCanvas');
+
+      crit.innerHTML = `Critical Exponent: $\\log_b(a) = \\mathbf{\\log_{${b}}(${a}) = ${logba.toFixed(2)}}$`;
+
+      if (logba > k) {
+        badge.innerHTML = `Case 1: $\\log_b(a) > k \\implies T(n) = \\mathbf{\\Theta(n^{${logba.toFixed(2)}})}$`;
+        expl.innerHTML = "Leaf-dominated recurrence. Work done at base leaves strictly dominates partition costs.";
+      } else if (Math.abs(logba - k) < 0.001) {
+        badge.innerHTML = `Case 2: $\\log_b(a) = k \\implies T(n) = \\mathbf{\\Theta(n^{${k}} \\log n)}$`;
+        expl.innerHTML = "Asymptotically balanced recurrence across all levels.";
+      } else {
+        badge.innerHTML = `Case 3: $\\log_b(a) < k \\implies T(n) = \\mathbf{\\Theta(n^{${k}})}$`;
+        expl.innerHTML = "Root-dominated recurrence. Initial split dominates subproblems.";
+      }
+
+      tree.innerHTML = `
+        <div class="text-cyan-400">Level 0: 1 subproblem of size n &rarr; Work: n^${k}</div>
+        <div class="text-emerald-400">Level 1: ${a} subproblems of size (n/${b}) &rarr; Work: ${a} &times; (n/${b})^${k}</div>
+        <div class="text-amber-400">Level 2: ${a*a} subproblems of size (n/${b*b}) &rarr; Work: ${a*a} &times; (n/${b*b})^${k}</div>
+      `;
     }
+
+    const NP_REGISTRY = {
+      vc: {
+        title: "Municipal CCTV Placement (2-Approximation Vertex Cover)",
+        class: "NP-Complete / NP-Hard",
+        reduction: "3-SAT &le;<sub>p</sub> Vertex Cover",
+        actionBtn: "Execute 2-Approx Vertex Cover",
+        actionFn: "runVertexCoverDemo"
+      },
+      tsp: {
+        title: "Municipal Patrol Tour (Traveling Salesperson Problem)",
+        class: "NP-Hard",
+        reduction: "Hamiltonian Cycle &le;<sub>p</sub> TSP",
+        actionBtn: "Solve TSP Tour via Branch & Bound / DP",
+        actionFn: "runTspPatrolDemo"
+      },
+      subset: {
+        title: "Emergency Generator Fuel Rationing (Subset Sum)",
+        class: "NP-Complete (Weakly NP-Complete)",
+        reduction: "3-SAT &le;<sub>p</sub> Subset Sum",
+        actionBtn: "Evaluate Exact Subset Sum via DP",
+        actionFn: "runSubsetSumDemo"
+      },
+      clique: {
+        title: "Inter-Agency Joint Crisis Coalition (Max-Clique)",
+        class: "NP-Complete",
+        reduction: "Vertex Cover &le;<sub>p</sub> Independent Set &le;<sub>p</sub> Clique",
+        actionBtn: "Find Maximum Mutual-Aid Coalition",
+        actionFn: "runCliqueDemo"
+      }
+    };
 
     function updateNpProblemDetails() {
       const key = document.getElementById('npProblemSelector').value;
+      const prob = NP_REGISTRY[key];
       const card = document.getElementById('npDetailCard');
-      if (key === 'vc') card.innerHTML = "2-Approximation Vertex Cover: Picks incident vertices on maximal edges.";
-      if (key === 'tsp') card.innerHTML = "Branch and Bound / Bitmask DP: Finds optimal Hamiltonian patrol tour.";
-      if (key === 'subset') card.innerHTML = "Subset Sum: Exact pseudo-polynomial dynamic programming verification.";
-      if (key === 'clique') card.innerHTML = "Max-Clique: Inter-agency fully connected coalition search.";
+      card.innerHTML = `
+        <div class="flex items-center justify-between">
+          <strong class="text-cyan-300 text-sm">${prob.title}</strong>
+          <span class="bg-rose-950 text-rose-300 border border-rose-800 px-2 py-0.5 rounded text-[10px] font-mono">${prob.class}</span>
+        </div>
+        <div class="text-amber-400 font-mono text-[11px]">Polynomial Transformation: ${prob.reduction}</div>
+        <div id="npInteractiveOutput" class="p-2.5 bg-slate-900 rounded border border-slate-800/80 font-mono text-[11px] text-slate-300">
+          Ready to execute algorithmic solver.
+        </div>
+        <button onclick="${prob.actionFn}()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold py-2 rounded-lg text-xs shadow-md">
+          ${prob.actionBtn}
+        </button>
+      `;
+    }
+
+    function runVertexCoverDemo() {
+      const coverNodes = new Set();
+      CITY_EDGES.forEach(e => {
+        if (!coverNodes.has(e.u) && !coverNodes.has(e.v)) {
+          coverNodes.add(e.u); coverNodes.add(e.v);
+        }
+      });
+      document.getElementById('npInteractiveOutput').innerHTML = `
+        <span class="text-emerald-400 font-bold">2-Approximation Vertex Cover Identified:</span><br>
+        Monitored Wards: ${Array.from(coverNodes).map(id => `[${id}] ${CITY_NODES[id].name}`).join(', ')}<br>
+        Total Cameras: ${coverNodes.size} of ${CITY_NODES.length} wards (&le; 2 &times; OPT).
+      `;
+      highlightedNodes = coverNodes;
+      highlightedEdges = [];
+      switchTab('tab-graph');
+      drawGraph();
+    }
+
+    function runTspPatrolDemo() {
+      const n = 8;
+      const dist = Array.from({ length: n }, () => Array(n).fill(Infinity));
+      for (let i = 0; i < n; i++) dist[i][i] = 0;
+      CITY_EDGES.forEach(e => {
+        if (e.u < n && e.v < n) {
+          dist[e.u][e.v] = Math.min(dist[e.u][e.v], e.weight);
+          dist[e.v][e.u] = Math.min(dist[e.v][e.u], e.weight);
+        }
+      });
+      for (let k = 0; k < n; k++)
+        for (let i = 0; i < n; i++)
+          for (let j = 0; j < n; j++)
+            dist[i][j] = Math.min(dist[i][j], dist[i][k] + dist[k][j]);
+
+      const memo = Array.from({ length: 1 << n }, () => Array(n).fill(-1));
+      function tsp(mask, pos) {
+        if (mask === (1 << n) - 1) return dist[pos][0];
+        if (memo[mask][pos] !== -1) return memo[mask][pos];
+        let ans = Infinity;
+        for (let nxt = 0; nxt < n; nxt++) {
+          if ((mask & (1 << nxt)) === 0) ans = Math.min(ans, dist[pos][nxt] + tsp(mask | (1 << nxt), nxt));
+        }
+        return memo[mask][pos] = ans;
+      }
+      const cost = tsp(1, 0);
+
+      let mask = 1, pos = 0;
+      const tour = [0];
+      for (let s = 1; s < n; s++) {
+        let bestNext = -1, bestVal = Infinity;
+        for (let nxt = 0; nxt < n; nxt++) {
+          if ((mask & (1 << nxt)) === 0) {
+            const v = dist[pos][nxt] + memo[mask | (1 << nxt)][nxt];
+            if (v < bestVal) { bestVal = v; bestNext = nxt; }
+          }
+        }
+        tour.push(bestNext); mask |= (1 << bestNext); pos = bestNext;
+      }
+      tour.push(0);
+
+      document.getElementById('npInteractiveOutput').innerHTML = `
+        <span class="text-emerald-400 font-bold">Optimal Patrol Circuit (Held-Karp Bitmask DP):</span><br>
+        Tour Route: ${tour.map(id => `W${id}`).join(" ➔ ")}<br>
+        Minimum Distance: <strong>${cost} km</strong> (Complexity: $O(n^2 2^n)$).
+      `;
+      highlightedEdges = [];
+      for (let i = 0; i < tour.length - 1; i++) highlightedEdges.push({ u: tour[i], v: tour[i+1], color: "#ec4899", width: 4 });
+      highlightedNodes = new Set(tour);
+      switchTab('tab-graph');
+      drawGraph();
+    }
+
+    function runSubsetSumDemo() {
+      const fuelTanks = [12, 18, 25, 30, 45, 50];
+      const target = 55;
+      const n = fuelTanks.length;
+      const dp = Array.from({ length: n + 1 }, () => Array(target + 1).fill(false));
+      for (let i = 0; i <= n; i++) dp[i][0] = true;
+
+      for (let i = 1; i <= n; i++) {
+        for (let s = 1; s <= target; s++) {
+          if (fuelTanks[i - 1] <= s) dp[i][s] = dp[i - 1][s] || dp[i - 1][s - fuelTanks[i - 1]];
+          else dp[i][s] = dp[i - 1][s];
+        }
+      }
+
+      let resS = target;
+      const subset = [];
+      for (let i = n; i > 0 && resS > 0; i--) {
+        if (dp[i][resS] && !dp[i - 1][resS]) {
+          subset.push(fuelTanks[i - 1]);
+          resS -= fuelTanks[i - 1];
+        }
+      }
+
+      document.getElementById('npInteractiveOutput').innerHTML = `
+        <span class="text-cyan-300 font-bold">Subset Sum Exact DP Verification:</span><br>
+        Available Tanks: [${fuelTanks.join(', ')}] kL<br>
+        Target Emergency Fuel: ${target} kL<br>
+        Subset Found: [${subset.join(' + ')}] = ${target} kL (${dp[n][target] ? 'EXACT MATCH' : 'NOT POSSIBLE'})<br>
+        Complexity: $O(n \\times \\text{Target})$.
+      `;
+    }
+
+    function runCliqueDemo() {
+      const adj = Array.from({ length: CITY_NODES.length }, () => Array(CITY_NODES.length).fill(false));
+      CITY_EDGES.forEach(e => { adj[e.u][e.v] = true; adj[e.v][e.u] = true; });
+      const cliques = [];
+      for (let i = 0; i < CITY_NODES.length; i++) {
+        for (let j = i + 1; j < CITY_NODES.length; j++) {
+          for (let k = j + 1; k < CITY_NODES.length; k++) {
+            if (adj[i][j] && adj[j][k] && adj[k][i]) cliques.push([i, j, k]);
+          }
+        }
+      }
+
+      document.getElementById('npInteractiveOutput').innerHTML = `
+        <span class="text-purple-400 font-bold">Max-Clique Redundant Coalitions Found:</span><br>
+        Total 3-Ward Coalitions: ${cliques.length}<br>
+        Coalition: Wards [${cliques[0].join(', ')}] (${cliques[0].map(id => CITY_NODES[id].name).join(' ⇄ ')})
+      `;
+      highlightedNodes = new Set(cliques[0]);
+      highlightedEdges = [
+        { u: cliques[0][0], v: cliques[0][1], color: "#a855f7", width: 4 },
+        { u: cliques[0][1], v: cliques[0][2], color: "#a855f7", width: 4 },
+        { u: cliques[0][2], v: cliques[0][0], color: "#a855f7", width: 4 }
+      ];
+      switchTab('tab-graph');
+      drawGraph();
+    }
+
+    function applyScenario(scenarioKey) {
+      resetGraphState();
+      switchTab('tab-graph');
+      if (scenarioKey === 'downtown') {
+        document.getElementById('graphAlgoSelect').value = "dijkstra";
+        document.getElementById('startNodeSelect').value = "0";
+        document.getElementById('endNodeSelect').value = "7";
+        updateAlgoInfo('dijkstra');
+        logTrace("🚨 SCENARIO INJECTED: 3-Alarm Medical Emergency at Ward [7]. Dispatched from Trauma Hospital [0].", "text-rose-400 font-bold");
+      } else if (scenarioKey === 'grid') {
+        document.getElementById('graphAlgoSelect').value = "kruskal";
+        updateAlgoInfo('kruskal');
+        logTrace("⚡ SCENARIO INJECTED: Power Grid Outage. Constructing Minimum Spanning Tree backbone.", "text-amber-400 font-bold");
+      } else if (scenarioKey === 'rushhour') {
+        document.getElementById('graphAlgoSelect').value = "bellman";
+        document.getElementById('startNodeSelect').value = "3";
+        document.getElementById('endNodeSelect').value = "8";
+        updateAlgoInfo('bellman');
+        logTrace("🚗 SCENARIO INJECTED: Rush hour congestion penalty relaxations via Bellman-Ford.", "text-cyan-400 font-bold");
+      }
     }
   </script>
 </body>
